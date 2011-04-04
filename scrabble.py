@@ -249,6 +249,23 @@ class ScrabbleGame(object):
             if self.scoreless_turns == 6:
                 self.end_game()
 
+    def skip(self):
+        self.scoreless_turn()
+
+    def swap(self, tiles):
+        if not self.bag.can_swap(tiles):
+            raise IllegalMove('Cannot swap tiles.')
+
+        old_rack = self.racks[self.player]
+        new_rack = old_rack - Counter(tiles)
+        old_rack_len = sum(old_rack.values())
+        new_rack_len = sum(new_rack.values())
+        if old_rack_len - len(tiles) != new_rack_len:
+            raise IllegalMove('Swapping tiles not in rack.')
+
+        new_rack.update(self.bag.swap(tiles))
+        self.racks[self.player] = new_rack
+
     def end_game(self):
         winning_score = max(self.scores)
         self.winners = [i for i, score in enumerate(self.scores)
