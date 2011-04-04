@@ -118,7 +118,7 @@ class ScrabbleGame(object):
     def play_tiles(self, played_tiles):
         if not played_tiles:
             self.scoreless_turn()
-            return ({}, 0)
+            return {'words': {}, 'score': 0}
 
         # Work out new rack. Still needs to take tiles out of bag once we know
         # the move played is valued.
@@ -219,6 +219,10 @@ class ScrabbleGame(object):
         new_rack.update(self.bag.pop_tiles(tiles_needed))
         self.racks[self.player] = new_rack
 
+        # Check if player used all tiles, and as such receives a bonus 50pts
+        if tiles_needed == 7:
+            score += 50
+
         # Check for endgame
         if not new_rack:
             for i in range(self.num_players):
@@ -235,7 +239,7 @@ class ScrabbleGame(object):
 
         self.player = (self.player + 1) % self.num_players
 
-        return (words, score)
+        return {'words': words, 'score': score}
 
     def scoreless_turn(self):
         self.player = (self.player + 1) % self.num_players
