@@ -5,6 +5,6 @@ admin.autodiscover()
 
 urlpatterns = patterns(
     '',
-    #url('', include('scrabbleapp.urls')),
+    url('', include('scrabbleapp.urls')),
     url(r'^admin/', include(admin.site.urls)),
 )
