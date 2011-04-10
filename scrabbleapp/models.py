@@ -12,7 +12,7 @@ class Game(models.Model):
     date_created = models.DateTimeField(auto_now=True)
 
     def get_players(self):
-        return []
+        return self.players.all().order_by('gameplayers__player_num')
 
     def __unicode__(self):
         game_str = u'Game %d - %s' % (self.pk, self.name)
@@ -26,3 +26,10 @@ class GamePlayers(models.Model):
     user = models.ForeignKey(User)
     game = models.ForeignKey(Game)
     player_num = models.IntegerField()
+
+    class Meta:
+        verbose_name_plural = 'Game Players'
+
+    def __unicode__(self):
+        return u'Player %d %s in game %d' % (self.player_num, self.user,
+                                             self.game.pk)
