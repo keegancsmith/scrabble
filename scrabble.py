@@ -90,7 +90,19 @@ def get_multipliers():
 
 
 def get_dictionary(dict_name):
-    return set()
+    # TODO make this setup.py aware
+    if hasattr(get_dictionary, dict_name):
+        return get_dictionary.dict_name
+
+    import os.path
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                        'data', '%s.txt' % dict_name)
+
+    with file(path, 'r') as fp:
+        d = set(line.strip() for line in fp)
+    
+    setattr(get_dictionary, dict_name, d)
+    return d
 
 class IllegalMove(Exception):
     def __init__(self, message):
@@ -99,7 +111,7 @@ class IllegalMove(Exception):
         return 'IllegalMove: ' + self.message
 
 class ScrabbleGame(object):
-    def __init__(self, num_players, dict_name='SOWPODS'):
+    def __init__(self, num_players, dict_name='sowpods'):
         assert 2 <= num_players <= 4
         self.num_players = num_players
         self.bag = Bag()
@@ -208,7 +220,7 @@ class ScrabbleGame(object):
             words[(word, start_pos)] = score
 
         for word, _ in words:
-            if word.lower() not in self.dictionary:
+            if word.upper() not in self.dictionary:
                 raise IllegalMove('"%s" is not a word.' % word)
 
         # From here on out we know the move played is valid
