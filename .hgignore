@@ -1,3 +1,4 @@
 syntax: glob
 *.pyc
 data/*.txt
+example_project/scrabble.db
