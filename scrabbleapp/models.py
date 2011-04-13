@@ -1,10 +1,10 @@
 from scrabble import ScrabbleGame
-from scrabbleapp.fields import PickleField
 
 from datetime import datetime
 
 from django.db import models
 from django.contrib.auth.models import User
+from picklefield.fields import PickledObjectField
 
 
 class Game(models.Model):
@@ -17,7 +17,7 @@ class Game(models.Model):
     date_created = models.DateTimeField(default=datetime.now)
     last_played  = models.DateTimeField(default=datetime.now)
     turn = models.IntegerField(default=0)
-    game_instance = PickleField()
+    game_instance = PickledObjectField()
 
     def get_players(self):
         return self.players.all().order_by('gameplayer__player_num')
