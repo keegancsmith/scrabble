@@ -22,6 +22,9 @@ class Game(models.Model):
     def get_players(self):
         return self.players.all().order_by('gameplayer__player_num')
 
+    def get_player(self, player_num):
+        return self.gameplayer_set.get(player_num=player_num)
+
     @classmethod
     def create_game(cls, players, name):
         if not name:
@@ -36,6 +39,26 @@ class Game(models.Model):
             player = GamePlayer(user=user, game=game, player_num=i)
             player.save()
         return game
+
+    def do_move(self, move, *args, **kw):
+        assert self.active
+        assert (self.gameplayer_set.get(user=self.current_player).player_num
+                =self.game_instance.player)
+        assert move in ('play_tiles', 'skip', 'swap')
+
+        g = self.game_instance
+        ret = getattr(g, move)(*args, **kw)
+
+        # Update fields to reflect change in game state
+        self.current_player = self.get_player(g.player)
+        self.last_played = datetime.now()
+        self.turn += 1
+        if g.winner:
+            # XXX currently don't support multiple winners
+            self.winner = self.get_player(g.winner[0])
+
+        self.save()
+        return ret
 
     def __unicode__(self):
         game_str = u'Game %d - %s' % (self.pk, self.name)
