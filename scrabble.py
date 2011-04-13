@@ -17,7 +17,7 @@ class Bag(object):
 
     def __init__(self):
         self.bag = list(''.join(c * freq for c, (freq, points)
-                                in Bag.letter_distribution))
+                                in Bag.letter_distribution.iteritems()))
         random.shuffle(self.bag)
 
     def can_swap(self, tiles=None):
@@ -51,7 +51,7 @@ class Bag(object):
 
 
 def get_multipliers():
-    if hasattr('multipliers', get_multipliers):
+    if hasattr(get_multipliers, 'multipliers'):
         return get_multipliers.multipliers
 
     board_layout = """
@@ -115,7 +115,7 @@ class ScrabbleGame(object):
         assert 2 <= num_players <= 4
         self.num_players = num_players
         self.bag = Bag()
-        self.racks = [Counter(self.bag.pop_tiles(7) for i in range(num_players))]
+        self.racks = [Counter(self.bag.pop_tiles(7)) for i in range(num_players)]
         self.scores = [0 for i in range(num_players)]
         self.player = 0
         self.board = {}
