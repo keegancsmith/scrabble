@@ -119,7 +119,7 @@ class ScrabbleGame(object):
         self.scores = [0 for i in range(num_players)]
         self.player = 0
         self.board = {}
-        self.dictionary = get_dictionary(dict_name)
+        self.dictionary = dict_name
         self.winner = []
         self.scoreless_turns = 0
 
@@ -220,7 +220,7 @@ class ScrabbleGame(object):
             words[(word, start_pos)] = score
 
         for word, _ in words:
-            if word.upper() not in self.dictionary:
+            if word.upper() not in get_dictionary(self.dictionary):
                 raise IllegalMove('"%s" is not a word.' % word)
 
         # From here on out we know the move played is valid
