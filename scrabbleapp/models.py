@@ -20,7 +20,7 @@ class Game(models.Model):
     game_instance = PickleField()
 
     def get_players(self):
-        return self.players.all().order_by('gameplayers__player_num')
+        return self.players.all().order_by('gameplayer__player_num')
 
     @classmethod
     def create_game(cls, players, name):
@@ -39,7 +39,12 @@ class Game(models.Model):
 
     def __unicode__(self):
         game_str = u'Game %d - %s' % (self.pk, self.name)
-        players_str = u', '.join(unicode(p) for p in self.players.all())
+        def mark_current_player(p):
+            if p == self.current_player:
+                return unicode(p) + '*'
+            else:
+                return unicode(p)
+        players_str = u', '.join(map(mark_current_player, self.get_players()))
         if self.winner is not None:
             game_str += u' won by %s' % unicode(self.winner)
         return u'%s %s' % (game_str, players_str)
