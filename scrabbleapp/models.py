@@ -43,7 +43,7 @@ class Game(models.Model):
     def do_move(self, move, *args, **kw):
         assert self.active
         assert (self.gameplayer_set.get(user=self.current_player).player_num
-                =self.game_instance.player)
+                == self.game_instance.player)
         assert move in ('play_tiles', 'skip', 'swap')
 
         g = self.game_instance
@@ -59,6 +59,10 @@ class Game(models.Model):
 
         self.save()
         return ret
+
+    @models.permalink
+    def get_absolute_url(self):
+        return ('game', [str(self.id)])
 
     def __unicode__(self):
         game_str = u'Game %d - %s' % (self.pk, self.name)
