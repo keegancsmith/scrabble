@@ -1,10 +1,13 @@
+from scrabble import IllegalMove
 from scrabbleapp.models import Game
+
+import json
 
 from annoying.decorators import ajax_request
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse, HttpResponseForbidden
-from django.shortcuts import render_to_response, get_object_or_404
-
+from django.http import HttpResponse, HttpResponseForbidden, HttpResponseBadRequest
+from django.shortcuts import get_object_or_404
+from django.views.decorators.http import require_POST, require_GET
 
 def game_required(func):
     def f(request, game_id, *args, **kw):
@@ -27,10 +30,12 @@ def active_games(request):
                                   for g in games))
 
 @game_required
+@require_GET
 def get_game(request):
     return HttpResponse('<html><body>%s</body></html>' % unicode(request.game))
 
 @game_required
+@require_GET
 @ajax_request
 def game_state(request):
     g = request.game.game_instance
@@ -46,5 +51,28 @@ def game_state(request):
     }
 
 @game_required
+@require_POST
+@ajax_request
 def game_move(request):
-    return HttpResponse('<html><body>game_move</body></html>')
+    if request.user != request.game.current_player:
+        raise HttpResponseForbidden()
+
+    move = request.POST['move']
+    if move not in ('play_tiles', 'skip', 'swap'):
+        raise HttpResponseBadRequest()
+
+    try:
+        if move == 'play_tiles':
+            played_tiles = json.decodes(request.POST['played_tiles'])
+            return request.game.do_move(move, played_tiles)
+        elif move == 'skip':
+            request.game.do_move(move)
+            return {}
+        else:
+            assert move == 'swap'
+            tiles = json.decodes(request.POST['tiles'])
+            request.game.do_move(move, tiles)
+            return {}
+
+    except IllegalMove as e:
+        raise HttpResponseBadRequest(e.message)
