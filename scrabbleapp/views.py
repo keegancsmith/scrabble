@@ -53,7 +53,7 @@ def game_state(request):
 @game_required
 @require_POST
 @ajax_request
-def game_move(request):
+def game_play(request):
     if request.user != request.game.current_player:
         raise HttpResponseForbidden()
 

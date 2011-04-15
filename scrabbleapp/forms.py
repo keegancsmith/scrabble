@@ -20,4 +20,4 @@ class CreateGameForm(forms.Form):
 
     def create_game(self):
         players = [self.cleaned_data['player%d' % i] for i in range(1, 5)]
-        return Game.create_game(players, name)
+        return Game.create_game(players, self.name)
