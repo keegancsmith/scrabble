@@ -3,7 +3,7 @@ from scrabbleapp.models import Game
 
 import json
 
-from annoying.decorators import ajax_request
+from annoying.decorators import ajax_request, render_to
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseForbidden, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
@@ -31,8 +31,9 @@ def active_games(request):
 
 @game_required
 @require_GET
+@render_to('scrabbleapp/game.html')
 def get_game(request):
-    return HttpResponse('<html><body>%s</body></html>' % unicode(request.game))
+    return { 'game': request.game }
 
 @game_required
 @require_GET
