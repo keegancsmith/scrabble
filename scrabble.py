@@ -100,7 +100,7 @@ def get_dictionary(dict_name):
 
     with file(path, 'r') as fp:
         d = set(line.strip() for line in fp)
-    
+
     setattr(get_dictionary, dict_name, d)
     return d
 
@@ -150,6 +150,11 @@ class ScrabbleGame(object):
             if not (0 <= v[0] < 15 and 0 <= v[1] < 15):
                 raise IllegalMove(
                     'Tile at position (%d, %d) is not on the board.' % v)
+
+        # Check if the starting move goes through the middle
+        if not any(self.scores) and (7, 7) not in played_tiles:
+            raise IllegalMove('First word played must go through '
+                              'the middle tile.')
 
         # Check all the tiles are in a single row or a single column
         if len(played_tiles) > 1:
@@ -211,17 +216,25 @@ class ScrabbleGame(object):
                 c += dc
             score *= word_mul
 
+            if len(word) <= 1:
+                return (None, None, None)
+
             return (''.join(word), (sr, sc), score)
         # XXX a lot slower than necessary
         for r, c in played_tiles:
             word, start_pos, score = get_word(r, c, 1, 0)
-            words[(word, start_pos)] = score
+            if word is not None:
+                words[(word, start_pos)] = score
             word, start_pos, score = get_word(r, c, 0, 1)
-            words[(word, start_pos)] = score
+            if word is not None:
+                words[(word, start_pos)] = score
 
         for word, _ in words:
             if word.upper() not in get_dictionary(self.dictionary):
                 raise IllegalMove('"%s" is not a word.' % word)
+
+        if not words:
+            raise IllegalMove('Must play a valid word.')
 
         # From here on out we know the move played is valid
         score = sum(words.values())
