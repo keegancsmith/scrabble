@@ -1,6 +1,7 @@
 var canvas;
 var ctx;
 var redraw = true;
+var immutable_state = null;
 var state = null;
 var cell_size;
 var multipliers = {
@@ -122,6 +123,12 @@ function init(game_id) {
     $.get('/game/' + game_id + '/state/', {},
           function (resp) {
               state = resp;
+              redraw = true;
+          });
+
+    $.get('/game/' + game_id + '/immutable_state/', {},
+          function (resp) {
+              immutable_state = resp;
               redraw = true;
           });
 

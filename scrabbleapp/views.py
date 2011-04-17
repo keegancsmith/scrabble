@@ -42,13 +42,26 @@ def game_state(request):
     g = request.game.game_instance
     player_num = request.game.gameplayer_set.get(user=request.user).player_num
     return {
-        'player_num': player_num,
         'num_players': g.num_players,
         'rack': list(g.racks[player_num].elements()),
         'scores': g.scores,
         'current_player': g.player,
         'winners': g.winner,
         'board': g.board
+    }
+
+@game_required
+@require_GET
+@ajax_request
+def game_immutable_state(request):
+    player_num = request.game.gameplayer_set.get(user=request.user).player_num
+    return {
+        'players': [{
+                'username': u.username,
+                'first_name': u.first_name,
+                'last_name': u.last_name
+            } for u in request.game.get_players()],
+        'player_num': player_num
     }
 
 @game_required
