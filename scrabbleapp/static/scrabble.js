@@ -1,5 +1,6 @@
 var canvas;
 var ctx;
+var game_id;
 
 // Game Logic State -- Fetched from Server
 var immutable_state = null;
@@ -10,7 +11,6 @@ var ui_state = {
     'redraw': true,
     'selected_tile': null,
     'selected_tile_pos': null,
-    'board_tiles': {},
     'rack_tiles_on_board': {},
     'rack_tiles_on_board_idx': {}
 };
@@ -49,8 +49,8 @@ function draw_board() {
         for (var j = 0; j < 15; j++) {
             var k = make_key(i, j);
 
-            if (k in ui_state.board_tiles) {
-                draw_tile(ui_state.board_tiles[k], i * cell_size, j * cell_size);
+            if (state !== null && k in state.board) {
+                draw_tile(state.board[k], i * cell_size, j * cell_size);
                 continue;
             } else if (k in ui_state.rack_tiles_on_board) {
                 var idx = ui_state.rack_tiles_on_board[k];
@@ -198,7 +198,7 @@ function position_in_rack(p) {
 
 
 function mouse_down(e) {
-    if (ui_state.selected_tile !== null)
+    if (ui_state.selected_tile !== null || state.winners.length > 0)
         return;
 
     var p = getCursorPosition(e);
@@ -237,7 +237,7 @@ function mouse_up(e) {
         return;
 
     var k = make_key(v.x, v.y);
-    if (k in ui_state.rack_tiles_on_board || k in ui_state.board_tiles)
+    if (k in ui_state.rack_tiles_on_board || k in state.board)
         return;
 
     ui_state.rack_tiles_on_board[k] = i;
@@ -252,6 +252,74 @@ function mouse_move(e) {
 
     ui_state.selected_tile_pos = getCursorPosition(e);
     ui_state.redraw = true;
+}
+
+
+function pass() {
+    // TODO
+    console.log("pass");
+}
+
+
+function swap() {
+    // TODO
+    console.log("swap");
+}
+
+
+function play() {
+    var played_tiles = {};
+    for (k in ui_state.rack_tiles_on_board) {
+        played_tiles[k] = state.rack[ui_state.rack_tiles_on_board[k]];
+    }
+    $.post('/game/' + game_id + '/play/',
+           { 'move': 'play_tiles',
+             'played_tiles': JSON.stringify(played_tiles) },
+          function (resp) {
+              console.log(resp);
+              ui_state.redraw = true;
+              get_state();
+          });
+}
+
+
+function add_actions() {
+    var actions = ['pass', 'swap', 'play'];
+    for (var i = 0; i < 3; i++) {
+        var action = actions[i];
+        $("#actions").append('<li><a href="javascript:' + action + '()">' + action + '</a></li>');
+    }
+}
+
+
+function add_winners() {
+    for (var i = 0; i < state.winners.length; i++) {
+        var idx = state.winners[i];
+        $('#actions').append('<li>' + immutable_state.players[idx].username + '</li>');
+    }
+}
+
+
+function add_refresh() {
+    $("#actions").append('<li>' + immutable_state.players[state.current_player].username + "'s turn</li>");
+    $("#actions").append('<li><a href="javascript:window.location.reload(true)">refresh</a></li>');
+}
+
+
+function get_state() {
+    $.get('/game/' + game_id + '/state/', {},
+          function (resp) {
+              state = resp;
+              $("#actions").html('');
+              if (state.winners.length != 0) {
+                  add_winners();
+              } else if (state.current_player == immutable_state.player_num) {
+                  add_actions();
+              } else {
+                  add_refresh();
+              }
+              ui_state.redraw = true;
+          });
 }
 
 
@@ -278,20 +346,15 @@ $('html').ajaxSend(function(event, xhr, settings) {
     }
 });
 
-function init(game_id) {
+function init(game_id_) {
     canvas = document.getElementById('canvas');
     ctx = canvas.getContext('2d');
-
-    $.get('/game/' + game_id + '/state/', {},
-          function (resp) {
-              state = resp;
-              ui_state.redraw = true;
-          });
+    game_id = game_id_;
 
     $.get('/game/' + game_id + '/immutable_state/', {},
           function (resp) {
               immutable_state = resp;
-              ui_state.redraw = true;
+              get_state();
           });
 
     var supportsTouch = 'createTouch' in document;

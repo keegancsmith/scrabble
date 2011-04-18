@@ -3,11 +3,13 @@
   <head>
     <title>Scrabble :: {{ game.name|escape }}</title>
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.min.js"></script>
+    <script type="text/javascript" src="https://github.com/douglascrockford/JSON-js/raw/master/json2.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}scrabble.js"></script>
   </head>
   <body>
     <div style="text-align: center">
       <canvas id="canvas" width="600" height="600"></canvas>
+      <ul id="actions"></ul>
     </div>
     <p style="text-align: right">
       Created by <a href="http://people.cs.uct.ac.za/~ksmith/">Keegan Carruthers-Smith</a> 2011

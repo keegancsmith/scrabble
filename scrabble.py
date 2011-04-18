@@ -44,7 +44,7 @@ class Bag(object):
         return tiles
 
     @classmethod
-    def points(cls, tile):
+    def score(cls, tile):
         if tile.islower():
             return 0
         return cls.letter_distribution[tile][1]
@@ -92,7 +92,7 @@ def get_multipliers():
 def get_dictionary(dict_name):
     # TODO make this setup.py aware
     if hasattr(get_dictionary, dict_name):
-        return get_dictionary.dict_name
+        return getattr(get_dictionary, dict_name)
 
     import os.path
     path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
@@ -200,13 +200,13 @@ class ScrabbleGame(object):
             while (r, c) in self.board or (r, c) in played_tiles:
                 pos = (r, c)
                 if pos in self.board:
-                    c = self.board[pos]
-                    word.append(c)
-                    score += Bag.score(c)
+                    ch = self.board[pos]
+                    word.append(ch)
+                    score += Bag.score(ch)
                 else:
-                    c = played_tiles[pos]
-                    word.append(c)
-                    v = Bag.score(c)
+                    ch = played_tiles[pos]
+                    word.append(ch)
+                    v = Bag.score(ch)
                     if pos in self.word_mul:
                         word_mul *= self.word_mul[pos]
                     elif pos in self.letter_mul:
@@ -247,6 +247,9 @@ class ScrabbleGame(object):
         # Check if player used all tiles, and as such receives a bonus 50pts
         if tiles_needed == 7:
             score += 50
+
+        # Add played tiles to board
+        self.board.update(played_tiles)
 
         # Check for endgame
         if not new_rack:

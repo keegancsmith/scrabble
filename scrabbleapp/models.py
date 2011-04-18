@@ -23,7 +23,7 @@ class Game(models.Model):
         return self.players.all().order_by('gameplayer__player_num')
 
     def get_player(self, player_num):
-        return self.gameplayer_set.get(player_num=player_num)
+        return self.gameplayer_set.get(player_num=player_num).user
 
     @classmethod
     def create_game(cls, players, name):
