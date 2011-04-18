@@ -9,7 +9,10 @@ var state = null;
 var ui_state = {
     'redraw': true,
     'selected_tile': null,
-    'selected_tile_pos': null
+    'selected_tile_pos': null,
+    'board_tiles': {},
+    'rack_tiles_on_board': {},
+    'rack_tiles_on_board_idx': {}
 };
 var ui_immutable_state = {
     'cell_size': 500 / 15,
@@ -24,12 +27,18 @@ var multipliers = {
 };
 
 
+function make_key(x, y) {
+    return x + ',' + y;
+}
+
+
 function draw_line(x1, y1, x2, y2) {
     ctx.beginPath();
     ctx.moveTo(x1, y1);
     ctx.lineTo(x2, y2);
     ctx.stroke();
 }
+
 
 function draw_board() {
     var cell_size = ui_immutable_state.cell_size;
@@ -38,7 +47,17 @@ function draw_board() {
 
     for (var i = 0; i < 15; i++) {
         for (var j = 0; j < 15; j++) {
-            var k = i + ',' + j;
+            var k = make_key(i, j);
+
+            if (k in ui_state.board_tiles) {
+                draw_tile(ui_state.board_tiles[k], i * cell_size, j * cell_size);
+                continue;
+            } else if (k in ui_state.rack_tiles_on_board) {
+                var idx = ui_state.rack_tiles_on_board[k];
+                draw_tile(state.rack[idx], i * cell_size, j * cell_size);
+                continue;
+            }
+
             var colour = '#cd853f';
             if (k in multipliers.word) {
                 colour = colours.word[multipliers.word[k]];
@@ -85,7 +104,8 @@ function draw_rack() {
     }
 
     for (var i = 0; i < state.rack.length; i++)
-        if (i != ui_state.selected_tile)
+        if (i != ui_state.selected_tile &&
+            !(i in ui_state.rack_tiles_on_board_idx))
             draw_tile(state.rack[i], i * cell_size, 0);
 
     ctx.strokeStyle = '#f5deb3';
@@ -184,8 +204,17 @@ function mouse_down(e) {
     var p = getCursorPosition(e);
     var i = position_in_rack(p);
 
-    if (i == null)
-        return
+    if (i === null) {
+        var a = position_in_board(p);
+        if (a === null)
+            return;
+        var k = make_key(a.x, a.y);
+        if (!(k in ui_state.rack_tiles_on_board))
+            return;
+        i = ui_state.rack_tiles_on_board[k];
+        delete ui_state.rack_tiles_on_board[k];
+        delete ui_state.rack_tiles_on_board_idx[i];
+    }
 
     ui_state.selected_tile = i;
     ui_state.selected_tile_pos = p;
@@ -197,18 +226,28 @@ function mouse_up(e) {
     if (ui_state.selected_tile === null)
         return;
 
+    var i = ui_state.selected_tile;
     var p = getCursorPosition(e);
     var v = position_in_board(p);
 
-    // TODO implement placing
-    console.log('Placed tile ' + state.rack[ui_state.selected_tile] + ' at (' + v.x + ', ' + v.y + ')');
     ui_state.selected_tile = null;
+    ui_state.redraw = true;
+
+    if (v === null)
+        return;
+
+    var k = make_key(v.x, v.y);
+    if (k in ui_state.rack_tiles_on_board || k in ui_state.board_tiles)
+        return;
+
+    ui_state.rack_tiles_on_board[k] = i;
+    ui_state.rack_tiles_on_board_idx[i] = k;
     ui_state.redraw = true;
 }
 
 
 function mouse_move(e) {
-    if (ui_state.selected_tile == null)
+    if (ui_state.selected_tile === null)
         return;
 
     ui_state.selected_tile_pos = getCursorPosition(e);
