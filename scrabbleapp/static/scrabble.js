@@ -283,12 +283,39 @@ function play() {
 }
 
 
+function recall_tiles() {
+    ui_state.rack_tiles_on_board = {};
+    ui_state.rack_tiles_on_board_idx = {};
+    ui_state.redraw = true;
+}
+
+
+function shuffle_tiles() {
+    if (ui_state.rack_tiles_on_board.length != 0)
+        return;
+    for (var i = state.rack.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var tmp = state.rack[i];
+        state.rack[i] = state.rack[j];
+        state.rack[j] = tmp;
+    }
+    ui_state.redraw = true;
+}
+
+
+function add_generic_actions() {
+    $("#actions").append('<li><a href="javascript:recall_tiles()">recall tiles</a></li>');
+    $("#actions").append('<li><a href="javascript:shuffle_tiles()">shuffle tiles</a></li>');
+}
+
+
 function add_actions() {
     var actions = ['pass', 'swap', 'play'];
     for (var i = 0; i < 3; i++) {
         var action = actions[i];
         $("#actions").append('<li><a href="javascript:' + action + '()">' + action + '</a></li>');
     }
+    add_generic_actions();
 }
 
 
@@ -303,12 +330,14 @@ function add_winners() {
 function add_refresh() {
     $("#actions").append('<li>' + immutable_state.players[state.current_player].username + "'s turn</li>");
     $("#actions").append('<li><a href="javascript:window.location.reload(true)">refresh</a></li>');
+    add_generic_actions();
 }
 
 
 function get_state() {
     $.get('/game/' + game_id + '/state/', {},
           function (resp) {
+              recall_tiles();
               state = resp;
               $("#actions").html('');
               if (state.winners.length != 0) {
