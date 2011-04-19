@@ -283,6 +283,14 @@ function play() {
 }
 
 
+function isEmpty(map) {
+    for(var key in map)
+        if (map.hasOwnProperty(key))
+            return false;
+    return true;
+}
+
+
 function recall_tiles() {
     ui_state.rack_tiles_on_board = {};
     ui_state.rack_tiles_on_board_idx = {};
@@ -291,7 +299,7 @@ function recall_tiles() {
 
 
 function shuffle_tiles() {
-    if (ui_state.rack_tiles_on_board.length != 0)
+    if (!isEmpty(ui_state.rack_tiles_on_board))
         return;
     for (var i = state.rack.length - 1; i > 0; i--) {
         var j = Math.floor(Math.random() * (i + 1));
