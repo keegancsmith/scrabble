@@ -184,6 +184,7 @@ class ScrabbleGame(object):
 
         # Get list of played words
         words = {}
+        touches_existing_tile = [False]
         def get_word(r, c, dr, dc):
             # Find start of word
             while (r, c) in self.board or (r, c) in played_tiles:
@@ -200,6 +201,7 @@ class ScrabbleGame(object):
             while (r, c) in self.board or (r, c) in played_tiles:
                 pos = (r, c)
                 if pos in self.board:
+                    touches_existing_tile[0] = True
                     ch = self.board[pos]
                     word.append(ch)
                     score += Bag.score(ch)
@@ -235,6 +237,10 @@ class ScrabbleGame(object):
 
         if not words:
             raise IllegalMove('Must play a valid word.')
+
+        if any(self.scores) and not touches_existing_tile[0]:
+            raise IllegalMove('Tiles played must be adjacent to an '
+                              'existing word.')
 
         # From here on out we know the move played is valid
         score = sum(words.values())
