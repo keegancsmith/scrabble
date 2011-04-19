@@ -329,7 +329,7 @@ function add_winners() {
 
 function add_refresh() {
     $("#actions").append('<li>' + immutable_state.players[state.current_player].username + "'s turn</li>");
-    $("#actions").append('<li><a href="javascript:window.location.reload(true)">refresh</a></li>');
+    $("#actions").append('<li><a href="javascript:get_state()">refresh</a></li>');
     add_generic_actions();
 }
 
