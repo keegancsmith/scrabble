@@ -51,11 +51,13 @@ function draw_board() {
             var k = make_key(i, j);
 
             if (state !== null && k in state.board) {
-                draw_tile(state.board[k], i * cell_size, j * cell_size);
+                draw_tile(state.board[k], i * cell_size, j * cell_size,
+                         '#8b4513');
                 continue;
             } else if (k in ui_state.rack_tiles_on_board) {
                 var idx = ui_state.rack_tiles_on_board[k];
-                draw_tile(state.rack[idx], i * cell_size, j * cell_size);
+                draw_tile(state.rack[idx], i * cell_size, j * cell_size,
+                          '#deb887');
                 continue;
             }
 
@@ -81,10 +83,10 @@ function draw_board() {
 }
 
 
-function draw_tile(c, x, y) {
+function draw_tile(c, x, y, colour) {
     var cell_size = ui_immutable_state.cell_size;
 
-    ctx.fillStyle = '#deb887';
+    ctx.fillStyle = colour;
     ctx.fillRect(x, y, cell_size, cell_size);
 
     ctx.textAlign = 'center';
@@ -114,7 +116,7 @@ function draw_rack() {
     for (var i = 0; i < state.rack.length; i++)
         if (i != ui_state.selected_tile &&
             !(i in ui_state.rack_tiles_on_board_idx))
-            draw_tile(state.rack[i], i * cell_size, 0);
+            draw_tile(state.rack[i], i * cell_size, 0, '#deb887');
 
     ctx.strokeStyle = '#f5deb3';
     ctx.lineWidth = 2;
@@ -148,7 +150,8 @@ function draw() {
     if (ui_state.selected_tile !== null)
         draw_tile(state.rack[ui_state.selected_tile],
                   ui_state.selected_tile_pos.x - ui_immutable_state.cell_size / 2,
-                  ui_state.selected_tile_pos.y - ui_immutable_state.cell_size / 2);
+                  ui_state.selected_tile_pos.y - ui_immutable_state.cell_size / 2,
+                  '#deb887');
 }
 
 
