@@ -93,7 +93,7 @@ function draw_tile(c, x, y, colour) {
     ctx.textBaseline = 'middle';
     ctx.fillStyle = 'white';
     ctx.font = 'bold 16px sans-serif';
-    ctx.fillText(c, x + cell_size / 2, y + cell_size / 2);
+    ctx.fillText(c.toUpperCase(), x + cell_size / 2, y + cell_size / 2);
 
     if (c in tile_value) {
         ctx.font = '8px sans-serif';
@@ -113,10 +113,17 @@ function draw_rack() {
         return;
     }
 
-    for (var i = 0; i < state.rack.length; i++)
-        if (i != ui_state.selected_tile &&
-            !(i in ui_state.rack_tiles_on_board_idx))
-            draw_tile(state.rack[i], i * cell_size, 0, '#deb887');
+    for (var i = 0; i < state.rack.length; i++) {
+        // Ignore tiles being moved or that are placed on the board
+        if (i == ui_state.selected_tile ||
+            i in ui_state.rack_tiles_on_board_idx)
+            continue;
+
+        if (state.rack[i].toLowerCase() == state.rack[i])
+            state.rack[i] = '_';
+
+        draw_tile(state.rack[i], i * cell_size, 0, '#deb887');
+    }
 
     ctx.strokeStyle = '#f5deb3';
     ctx.lineWidth = 2;
@@ -250,6 +257,18 @@ function mouse_up(e) {
     var k = make_key(v.x, v.y);
     if (k in ui_state.rack_tiles_on_board || k in state.board)
         return;
+
+    if (state.rack[i].toLowerCase() == state.rack[i]) {
+        var choice = window.prompt('Which letter do you want to place?');
+        if (choice === null) {
+            return;
+        } else if (! /^[a-zA-Z]$/.test(choice)) {
+            alert('Must input a single letter!');
+            return;
+        } else {
+            state.rack[i] = choice[0].toLowerCase();
+        }
+    }
 
     ui_state.rack_tiles_on_board[k] = i;
     ui_state.rack_tiles_on_board_idx[i] = k;
