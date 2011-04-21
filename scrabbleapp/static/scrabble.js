@@ -52,12 +52,11 @@ function draw_board() {
 
             if (state !== null && k in state.board) {
                 draw_tile(state.board[k], i * cell_size, j * cell_size,
-                         '#8b4513');
+                         true);
                 continue;
             } else if (k in ui_state.rack_tiles_on_board) {
                 var idx = ui_state.rack_tiles_on_board[k];
-                draw_tile(state.rack[idx], i * cell_size, j * cell_size,
-                          '#deb887');
+                draw_tile(state.rack[idx], i * cell_size, j * cell_size);
                 continue;
             }
 
@@ -83,15 +82,20 @@ function draw_board() {
 }
 
 
-function draw_tile(c, x, y, colour) {
-    var cell_size = ui_immutable_state.cell_size;
+function draw_tile(c, x, y, moveable) {
+    if (moveable === undefined)
+        moveable = false;
 
-    ctx.fillStyle = colour;
+    var cell_size = ui_immutable_state.cell_size;
+    var tile_colour = moveable ? '#8b4513' : '#966f33';
+    var text_colour = moveable ? 'white' : 'white';
+
+    ctx.fillStyle = tile_colour;
     ctx.fillRect(x, y, cell_size, cell_size);
 
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillStyle = 'white';
+    ctx.fillStyle = text_colour;
     ctx.font = 'bold 16px sans-serif';
     ctx.fillText(c.toUpperCase(), x + cell_size / 2, y + cell_size / 2);
 
@@ -122,7 +126,7 @@ function draw_rack() {
         if (state.rack[i].toLowerCase() == state.rack[i])
             state.rack[i] = '_';
 
-        draw_tile(state.rack[i], i * cell_size, 0, '#deb887');
+        draw_tile(state.rack[i], i * cell_size, 0);
     }
 
     ctx.strokeStyle = '#f5deb3';
@@ -157,8 +161,7 @@ function draw() {
     if (ui_state.selected_tile !== null)
         draw_tile(state.rack[ui_state.selected_tile],
                   ui_state.selected_tile_pos.x - ui_immutable_state.cell_size / 2,
-                  ui_state.selected_tile_pos.y - ui_immutable_state.cell_size / 2,
-                  '#deb887');
+                  ui_state.selected_tile_pos.y - ui_immutable_state.cell_size / 2);
 }
 
 
