@@ -300,6 +300,8 @@ class ScrabbleGame(object):
         new_rack.update(self.bag.swap(tiles))
         self.racks[self.player] = new_rack
 
+        self.scoreless_turn()
+
     def end_game(self):
         winning_score = max(self.scores)
         self.winners = [i for i, score in enumerate(self.scores)
