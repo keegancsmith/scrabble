@@ -53,9 +53,9 @@ class Game(models.Model):
         self.current_player = self.get_player(g.player)
         self.last_played = datetime.now()
         self.turn += 1
-        if g.winner:
+        if g.winners:
             # XXX currently don't support multiple winners
-            self.winner = self.get_player(g.winner[0])
+            self.winner = self.get_player(g.winners[0])
 
         self.save()
         return ret

@@ -120,7 +120,7 @@ class ScrabbleGame(object):
         self.player = 0
         self.board = {}
         self.dictionary = dict_name
-        self.winner = []
+        self.winners = []
         self.scoreless_turns = 0
 
         multipliers = get_multipliers()
@@ -260,7 +260,7 @@ class ScrabbleGame(object):
         # Check for endgame
         if not new_rack:
             for i in range(self.num_players):
-                rack_value = sum(Bag.score(c) for c in self.rack.elements())
+                rack_value = sum(Bag.score(c) for c in self.racks[i].elements())
                 self.scores[i] -= rack_value
                 score += rack_value
 

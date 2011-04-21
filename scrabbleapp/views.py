@@ -52,7 +52,7 @@ def game_state(request):
         'rack': list(g.racks[player_num].elements()),
         'scores': g.scores,
         'current_player': g.player,
-        'winners': g.winner,
+        'winners': g.winners,
         'board': pos_key_to_js_key(g.board)
     }
 

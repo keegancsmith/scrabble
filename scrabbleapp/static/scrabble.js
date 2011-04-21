@@ -378,6 +378,7 @@ function add_actions() {
 
 
 function add_winners() {
+    $('#actions').append('<li>Game over. Winners:</li>');
     for (var i = 0; i < state.winners.length; i++) {
         var idx = state.winners[i];
         $('#actions').append('<li>' + immutable_state.players[idx].username + '</li>');
