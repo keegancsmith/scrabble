@@ -27,11 +27,9 @@ class Bag(object):
 
     def swap(self, tiles):
         assert self.can_swap(tiles)
-        i = len(self.bag) - len(tiles)
-        new_tiles = self.bag[i:]
-        self.bag = self.bag[:i] + tiles
+        self.bag += tiles
         random.shuffle(self.bag)
-        return new_tiles
+        return self.pop_tiles(len(tiles))
 
     def tiles_left(self):
         return len(self.bag)
