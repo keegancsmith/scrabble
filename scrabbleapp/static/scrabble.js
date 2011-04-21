@@ -286,8 +286,11 @@ function mouse_move(e) {
 
 
 function pass() {
-    // TODO
-    console.log("pass");
+    $.post('/game/' + game_id + '/play/',
+           { 'move': 'skip' },
+           function (resp) {
+               get_state();
+           });
 }
 
 
@@ -305,14 +308,14 @@ function play() {
     $.post('/game/' + game_id + '/play/',
            { 'move': 'play_tiles',
              'played_tiles': JSON.stringify(played_tiles) },
-          function (resp) {
-              if ('illegal_move' in resp) {
-                  alert('Illegal Move: ' + resp.illegal_move);
-              } else {
-                  get_state();
-                  alert('You scored ' + resp.score + ' points');
-              }
-          });
+           function (resp) {
+               if ('illegal_move' in resp) {
+                   alert('Illegal Move: ' + resp.illegal_move);
+               } else {
+                   get_state();
+                   alert('You scored ' + resp.score + ' points');
+               }
+           });
 }
 
 
