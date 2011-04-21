@@ -10,6 +10,10 @@
     <div style="text-align: center">
       <canvas id="canvas" width="600" height="600"></canvas>
       <ul id="actions"></ul>
+      <form method="post" action="#" onsubmit="return(word_in_dictionary())">
+        <p     id="dictionary-status">Check if a word is in the dictionary</p>
+        <input id="dictionary-word" type="text" name="word" />
+      </form>
     </div>
     <p style="text-align: right">
       Created by <a href="http://people.cs.uct.ac.za/~ksmith/">Keegan Carruthers-Smith</a> 2011

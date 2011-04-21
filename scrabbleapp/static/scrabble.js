@@ -333,6 +333,20 @@ function play() {
 }
 
 
+function word_in_dictionary() {
+    var word = $('#dictionary-word').val();
+    $.post('/game/' + game_id + '/dictionary/',
+           { word: word },
+           function (resp) {
+               if (resp.in_dictionary)
+                   $('#dictionary-status').html(resp.word + ' is a word');
+               else
+                   $('#dictionary-status').html(resp.word + ' is not a word');
+           });
+    return false;
+}
+
+
 function isEmpty(map) {
     for(var key in map)
         if (map.hasOwnProperty(key))

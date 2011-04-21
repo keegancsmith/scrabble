@@ -1,4 +1,4 @@
-from scrabble import IllegalMove
+from scrabble import IllegalMove, get_dictionary
 from scrabbleapp.models import Game
 
 import json
@@ -99,3 +99,15 @@ def game_play(request):
 
     except IllegalMove as e:
         return {'illegal_move': e.message}
+
+
+@game_required
+@require_POST
+@ajax_request
+def word_in_dictionary(request):
+    word = request.POST['word']
+    dictionary = get_dictionary(request.game.game_instance.dictionary)
+    return {
+        'word': word,
+        'in_dictionary': word.upper() in dictionary,
+    }
