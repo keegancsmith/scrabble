@@ -295,8 +295,22 @@ function pass() {
 
 
 function swap() {
-    // TODO
-    console.log("swap");
+    var tiles = window.prompt('Which letters do you want to swap?\n' +
+                               'Choices: ' + state.rack.join(', '));
+    if (tiles === null)
+        return;
+    tiles = tiles.toUpperCase().replace(/\s+/g, '').split('');
+    tiles.sort();
+
+    $.post('/game/' + game_id + '/play/',
+           { 'move': 'swap',
+             'tiles': JSON.stringify(tiles) },
+           function (resp) {
+               if ('illegal_move' in resp) {
+                   alert('Illegal Move: ' + resp.illegal_move);
+               }
+               get_state();
+           });
 }
 
 
