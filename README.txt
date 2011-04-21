@@ -18,6 +18,7 @@ get a running server::
   $ virtualenv --no-site-packages env
   $ source env/bin/activate
   $ pip install -r requirements.txt
+  $ pip install -r example_project/requirements.txt
   $ (cd data; ./fetch_dictionaries.sh)
   $ python example_project/manage.py syncdb
   $ python example_project/manage.py runserver 0:8000
