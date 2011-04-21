@@ -1,1 +1,1 @@
-django-devserver==0.1.6
+git+git://github.com/dcramer/django-devserver#egg=django-devserver
