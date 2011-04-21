@@ -364,6 +364,14 @@ function shuffle_tiles() {
 function add_generic_actions() {
     $("#actions").append('<li><a href="javascript:recall_tiles()">recall tiles</a></li>');
     $("#actions").append('<li><a href="javascript:shuffle_tiles()">shuffle tiles</a></li>');
+    if (state !== null) {
+        var player_list = $('<ol></ol>');
+        for (var i = 0; i < state.num_players; i++) {
+            player_list.append('<li>' + immutable_state.players[i].username +
+                               ' - ' + state.scores[i] + '</li>');
+        }
+        $('#actions').append(player_list);
+    }
 }
 
 
