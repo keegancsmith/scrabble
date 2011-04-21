@@ -306,9 +306,12 @@ function play() {
            { 'move': 'play_tiles',
              'played_tiles': JSON.stringify(played_tiles) },
           function (resp) {
-              console.log(resp);
-              ui_state.redraw = true;
-              get_state();
+              if ('illegal_move' in resp) {
+                  alert('Illegal Move: ' + resp.illegal_move);
+              } else {
+                  get_state();
+                  alert('You scored ' + resp.score + ' points');
+              }
           });
 }
 
