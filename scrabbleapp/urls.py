@@ -3,8 +3,8 @@ from django.conf.urls.defaults import patterns, url
 urlpatterns = patterns(
     'scrabbleapp.views',
     (r'^$', 'active_games'),
-    (r'^create_game/$', 'create_game'),
-    (r'^active_games/$', 'active_games'),
+    url(r'^create_game/$', 'create_game', name='game-create'),
+    url(r'^active_games/$', 'active_games', name='list-active-games'),
 
     url(r'^game/(\d+)/$', 'get_game', name='game'),
     url(r'^game/(\d+)/state/$', 'game_state', name='game-state'),

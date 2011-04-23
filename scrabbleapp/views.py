@@ -1,11 +1,13 @@
 from scrabble import IllegalMove, get_dictionary
 from scrabbleapp.models import Game
+from scrabbleapp.forms import CreateGameForm
 
 import json
 
 from annoying.decorators import ajax_request, render_to
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse, HttpResponseForbidden, HttpResponseBadRequest
+from django.http import (HttpResponse, HttpResponseForbidden,
+                         HttpResponseBadRequest, HttpResponseRedirect)
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST, require_GET
 
@@ -25,8 +27,17 @@ def js_key_to_pos_key(dic):
     return dict((tuple(map(int, k.split(','))), v) for k, v in dic.iteritems())
 
 @login_required
+@render_to('scrabbleapp/create_game.html')
 def create_game(request):
-    return HttpResponse('<html><body>create_game</body></html>')
+    if request.method == 'POST':
+        form = CreateGameForm(request.user, request.POST)
+        if form.is_valid():
+            game = form.create_game()
+            return HttpResponseRedirect(game.get_absolute_url())
+    else:
+        form = CreateGameForm(request.user)
+
+    return { 'form':  form }
 
 @login_required
 def active_games(request):
