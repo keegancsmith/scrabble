@@ -166,6 +166,27 @@ function draw() {
 }
 
 
+function swap_tiles_on_rack(i, j) {
+    if (i == j)
+        return;
+
+    // Assumes i is not placed on the board
+    if (j in ui_state.rack_tiles_on_board_idx) {
+        var k = ui_state.rack_tiles_on_board_idx[j];
+        delete ui_state.rack_tiles_on_board_idx[j];
+
+        ui_state.rack_tiles_on_board[k] = i;
+        ui_state.rack_tiles_on_board_idx[i] = k;
+    }
+
+    var tmp = state.rack[i];
+    state.rack[i] = state.rack[j];
+    state.rack[j] = tmp;
+
+    ui_state.redraw = true;
+}
+
+
 function getCursorPosition(e) {
     var x;
     var y;
@@ -213,7 +234,7 @@ function position_in_rack(p) {
         return null;
     x = Math.floor(x / ui_immutable_state.cell_size);
     y = Math.floor(y / ui_immutable_state.cell_size);
-    if (x > 6 || y > 1)
+    if (x >= state.rack.length || y > 1)
         return null;
     return x;
 }
@@ -255,8 +276,12 @@ function mouse_up(e) {
     ui_state.selected_tile = null;
     ui_state.redraw = true;
 
-    if (v === null)
+    if (v === null) {
+        var j = position_in_rack(p);
+        if (j !== null)
+            swap_tiles_on_rack(i, j)
         return;
+    }
 
     var k = make_key(v.x, v.y);
     if (k in ui_state.rack_tiles_on_board || k in state.board)
