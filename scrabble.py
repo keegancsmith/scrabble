@@ -250,7 +250,7 @@ class ScrabbleGame(object):
         self.racks[self.player] = new_rack
 
         # Check if player used all tiles, and as such receives a bonus 50pts
-        if tiles_needed == 7:
+        if len(played_tiles) == 7:
             score += 50
 
         # Add played tiles to board
