@@ -100,9 +100,10 @@ function draw_tile(c, x, y, moveable) {
     ctx.fillText(c.toUpperCase(), x + cell_size / 2, y + cell_size / 2);
 
     if (c in tile_value) {
-        ctx.font = '8px sans-serif';
+        ctx.font = '12px sans-serif';
+        ctx.textAlign = 'right';
         ctx.textBaseline = 'bottom';
-        ctx.fillText(tile_value[c] + '', x + cell_size / 2, y + cell_size);
+        ctx.fillText(tile_value[c] + '', x + cell_size * 0.9, y + cell_size);
     }
 }
 
