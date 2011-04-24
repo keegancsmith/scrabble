@@ -7,6 +7,7 @@ var immutable_state = null;
 var state = null;
 
 // UI State
+var board_image;
 var ui_state = {
     'redraw': true,
     'selected_tile': null,
@@ -54,10 +55,6 @@ function draw_board() {
             if (state !== null && k in state.board) {
                 draw_tile(state.board[k], i * cell_size, j * cell_size,
                          true);
-                continue;
-            } else if (k in ui_state.rack_tiles_on_board) {
-                var idx = ui_state.rack_tiles_on_board[k];
-                draw_tile(state.rack[idx], i * cell_size, j * cell_size);
                 continue;
             }
 
@@ -141,6 +138,26 @@ function draw_rack() {
 }
 
 
+function draw_other_tiles() {
+    var cell_size = ui_immutable_state.cell_size;
+
+    // Draw moveable tiles on the board
+    for (var k in ui_state.rack_tiles_on_board) {
+        var idx = ui_state.rack_tiles_on_board[k];
+        k = k.split(',');
+        var x = ui_immutable_state.board_offset[0] + parseInt(k[0]) * cell_size;
+        var y = ui_immutable_state.board_offset[1] + parseInt(k[1]) * cell_size;
+        draw_tile(state.rack[idx], x, y);
+    }
+
+    // Draw tile that is currently moving
+    if (ui_state.selected_tile !== null)
+        draw_tile(state.rack[ui_state.selected_tile],
+                  ui_state.selected_tile_pos.x - cell_size / 2,
+                  ui_state.selected_tile_pos.y - cell_size / 2);
+}
+
+
 function draw() {
     if (!ui_state.redraw)
         return;
@@ -149,11 +166,16 @@ function draw() {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    ctx.save();
-    ctx.translate(ui_immutable_state.board_offset[0],
-                  ui_immutable_state.board_offset[1]);
-    draw_board();
-    ctx.restore();
+    if (board_image === undefined) {
+        ctx.save();
+        ctx.translate(ui_immutable_state.board_offset[0],
+                      ui_immutable_state.board_offset[1]);
+        draw_board();
+        ctx.restore();
+        board_image = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    } else {
+        ctx.putImageData(board_image, 0, 0);
+    }
 
     ctx.save();
     ctx.translate(ui_immutable_state.rack_offset[0],
@@ -161,10 +183,7 @@ function draw() {
     draw_rack();
     ctx.restore();
 
-    if (ui_state.selected_tile !== null)
-        draw_tile(state.rack[ui_state.selected_tile],
-                  ui_state.selected_tile_pos.x - ui_immutable_state.cell_size / 2,
-                  ui_state.selected_tile_pos.y - ui_immutable_state.cell_size / 2);
+    draw_other_tiles();
 }
 
 
@@ -470,6 +489,7 @@ function get_state() {
               } else {
                   add_refresh();
               }
+              board_image = undefined;
               ui_state.redraw = true;
           });
 }
