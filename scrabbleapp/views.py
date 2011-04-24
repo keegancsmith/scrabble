@@ -58,13 +58,20 @@ def get_game(request):
 def game_state(request):
     g = request.game.game_instance
     player_num = request.game.gameplayer_set.get(user=request.user).player_num
+
+    if 'turn' in request.GET and int(request.GET['turn']) == request.game.turn:
+        request.game.wait()
+        game = get_object_or_404(Game, pk=request.game.id)
+        g = game.game_instance
+
     return {
         'num_players': g.num_players,
         'rack': list(g.racks[player_num].elements()),
         'scores': g.scores,
         'current_player': g.player,
         'winners': g.winners,
-        'board': pos_key_to_js_key(g.board)
+        'board': pos_key_to_js_key(g.board),
+        'turn': request.game.turn
     }
 
 @game_required

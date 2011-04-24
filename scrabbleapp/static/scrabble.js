@@ -5,6 +5,7 @@ var game_id;
 // Game Logic State -- Fetched from Server
 var immutable_state = null;
 var state = null;
+var error_sleep_time = 500;
 
 // UI State
 var board_image;
@@ -365,7 +366,7 @@ function pass() {
     $.post('/game/' + game_id + '/play/',
            { 'move': 'skip' },
            function (resp) {
-               get_state();
+               //get_state();
            });
 }
 
@@ -385,7 +386,7 @@ function swap() {
                if ('illegal_move' in resp) {
                    alert('Illegal Move: ' + resp.illegal_move);
                }
-               get_state();
+               //get_state();
            });
 }
 
@@ -402,7 +403,7 @@ function play() {
                if ('illegal_move' in resp) {
                    alert('Illegal Move: ' + resp.illegal_move);
                } else {
-                   get_state();
+                   //get_state();
                    alert('You scored ' + resp.score + ' points');
                }
            });
@@ -486,27 +487,53 @@ function add_winners() {
 
 function add_refresh() {
     $("#actions").append('<li>' + immutable_state.players[state.current_player].username + "'s turn</li>");
-    $("#actions").append('<li><a href="javascript:get_state()">refresh</a></li>');
+    //$("#actions").append('<li><a href="javascript:get_state()">refresh</a></li>');
     add_generic_actions();
 }
 
 
+function get_state_success(resp) {
+    var changed = state === null || state.turn != resp.turn;
+    if (!changed) {
+        window.setTimeout(get_state, 0);
+        return;
+    }
+
+    recall_tiles();
+    state = resp;
+    $("#actions").html('');
+    if (state.winners.length != 0) {
+        add_winners();
+    } else if (state.current_player == immutable_state.player_num) {
+        add_actions();
+    } else {
+        add_refresh();
+    }
+    board_image = undefined;
+    ui_state.redraw = true;
+
+    window.setTimeout(get_state, 0);
+}
+
+
+function get_state_error(resp) {
+    error_sleep_time *= 2;
+    console.log("Poll error; sleeping for", error_sleep_time, "ms");
+    window.setTimeout(get_state, error_sleep_time);
+}
+
+
 function get_state() {
-    $.get('/game/' + game_id + '/state/', {},
-          function (resp) {
-              recall_tiles();
-              state = resp;
-              $("#actions").html('');
-              if (state.winners.length != 0) {
-                  add_winners();
-              } else if (state.current_player == immutable_state.player_num) {
-                  add_actions();
-              } else {
-                  add_refresh();
-              }
-              board_image = undefined;
-              ui_state.redraw = true;
-          });
+    var data = {};
+    if (state !== null)
+        data['turn'] = state.turn;
+
+    $.ajax({url: '/game/' + game_id + '/state/',
+            type: 'GET',
+            dataType: 'json',
+            data: data,
+            success: get_state_success,
+            error: get_state_error});
 }
 
 

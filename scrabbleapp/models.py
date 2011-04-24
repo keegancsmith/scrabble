@@ -1,4 +1,5 @@
 from scrabble import ScrabbleGame
+from scrabbleapp import pubsub
 
 from datetime import datetime
 
@@ -58,7 +59,12 @@ class Game(models.Model):
             self.winner = self.get_player(g.winners[0])
 
         self.save()
+        pubsub.publish(self.id)
+
         return ret
+
+    def wait(self):
+        pubsub.wait(self.id)
 
     @models.permalink
     def get_absolute_url(self):
