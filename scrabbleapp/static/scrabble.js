@@ -12,6 +12,7 @@ var ui_state = {
     'redraw': true,
     'selected_tile': null,
     'selected_tile_pos': null,
+    'selected_tile_prev_pos': null,
     'rack_tiles_on_board': {},
     'rack_tiles_on_board_idx': {}
 };
@@ -149,12 +150,6 @@ function draw_other_tiles() {
         var y = ui_immutable_state.board_offset[1] + parseInt(k[1]) * cell_size;
         draw_tile(state.rack[idx], x, y);
     }
-
-    // Draw tile that is currently moving
-    if (ui_state.selected_tile !== null)
-        draw_tile(state.rack[ui_state.selected_tile],
-                  ui_state.selected_tile_pos.x - cell_size / 2,
-                  ui_state.selected_tile_pos.y - cell_size / 2);
 }
 
 
@@ -164,7 +159,16 @@ function draw() {
 
     ui_state.redraw = false;
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (ui_state.selected_tile_prev_pos !== null) {
+        ctx.save();
+        var c = ui_immutable_state.cell_size;
+        var x = ui_state.selected_tile_prev_pos.x - c / 2;
+        var y = ui_state.selected_tile_prev_pos.y - c / 2;
+        ctx.rect(x - 1, y - 1, x + cell_size + 1, y + cell_size + 1);
+        ctx.clip();
+    } else {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
 
     if (board_image === undefined) {
         ctx.save();
@@ -184,6 +188,17 @@ function draw() {
     ctx.restore();
 
     draw_other_tiles();
+
+    if (ui_state.selected_tile_prev_pos !== null) {
+        ui_state.selected_tile_prev_pos = ui_state.selected_tile_pos;
+        ctx.restore();
+    }
+
+    // Draw tile that is currently moving
+    if (ui_state.selected_tile !== null)
+        draw_tile(state.rack[ui_state.selected_tile],
+                  ui_state.selected_tile_pos.x - ui_immutable_state.cell_size / 2,
+                  ui_state.selected_tile_pos.y - ui_immutable_state.cell_size / 2);
 }
 
 
