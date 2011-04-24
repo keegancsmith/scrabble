@@ -45,8 +45,9 @@ function draw_board() {
     var cell_size = ui_immutable_state.cell_size;
     var colours = { 'word'   : { 3 : '#ff4500', 2 : '#ff7f50' },
                     'letter' : { 3 : '#1e90ff', 2 : '#b0e0e6' } };
+    var i;
 
-    for (var i = 0; i < 15; i++) {
+    for (i = 0; i < 15; i++) {
         for (var j = 0; j < 15; j++) {
             var k = make_key(i, j);
 
@@ -74,7 +75,7 @@ function draw_board() {
 
     ctx.strokeStyle = '#deb887';
     ctx.lineWidth = 2;
-    for (var i = 0; i <= 15; i++) {
+    for (i = 0; i <= 15; i++) {
         var offset = i * cell_size;
         draw_line(offset, 0, offset, 15 * cell_size);
         draw_line(0, offset, 15 * cell_size, offset);
@@ -110,6 +111,7 @@ function draw_tile(c, x, y, moveable) {
 
 function draw_rack() {
     var cell_size = ui_immutable_state.cell_size;
+    var i;
 
     if (state === null) {
         ctx.textAlign = 'center';
@@ -118,7 +120,7 @@ function draw_rack() {
         return;
     }
 
-    for (var i = 0; i < state.rack.length; i++) {
+    for (i = 0; i < state.rack.length; i++) {
         // Ignore tiles being moved or that are placed on the board
         if (i == ui_state.selected_tile ||
             i in ui_state.rack_tiles_on_board_idx)
@@ -134,7 +136,7 @@ function draw_rack() {
     ctx.lineWidth = 2;
     draw_line(0, 0, 7 * cell_size, 0);
     draw_line(0, cell_size, 7 * cell_size, cell_size);
-    for (var i = 0; i <= 7; i++)
+    for (i = 0; i <= 7; i++)
         draw_line(i * cell_size, 0, i * cell_size, cell_size);
 }
 
@@ -274,8 +276,9 @@ function mouse_up(e) {
     var p = getCursorPosition(e);
     var v = position_in_board(p);
 
-    // XXX For some reason my ipad has messed up positions. Just hack around
-    // it for now by useing last saved ui_state.selected_tile_pos.
+    // On a touch device when the fingers have been lifted there is no
+    // position data associated with that. So use ui_state.selected_tile_pos
+    // which would be the last position we drew a tile.
     if (p.x < 0) {
         p = ui_state.selected_tile_pos;
         v = position_in_board(p);
