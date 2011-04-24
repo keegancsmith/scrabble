@@ -262,8 +262,9 @@ function mouse_down(e) {
     ui_state.selected_tile = i;
     ui_state.selected_tile_pos = p;
     ui_state.redraw = true;
-}
 
+    e.preventDefault();
+}
 
 function mouse_up(e) {
     if (ui_state.selected_tile === null)
@@ -273,13 +274,20 @@ function mouse_up(e) {
     var p = getCursorPosition(e);
     var v = position_in_board(p);
 
+    // XXX For some reason my ipad has messed up positions. Just hack around
+    // it for now by useing last saved ui_state.selected_tile_pos.
+    if (p.x < 0) {
+        p = ui_state.selected_tile_pos;
+        v = position_in_board(p);
+    }
+
     ui_state.selected_tile = null;
     ui_state.redraw = true;
 
     if (v === null) {
         var j = position_in_rack(p);
         if (j !== null)
-            swap_tiles_on_rack(i, j)
+            swap_tiles_on_rack(i, j);
         return;
     }
 
@@ -308,6 +316,8 @@ function mouse_up(e) {
 function mouse_move(e) {
     if (ui_state.selected_tile === null)
         return;
+
+    e.preventDefault();
 
     ui_state.selected_tile_pos = getCursorPosition(e);
     ui_state.redraw = true;
