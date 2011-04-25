@@ -10,17 +10,17 @@ var error_sleep_time = 500;
 // UI State
 var board_image;
 var ui_state = {
-    'redraw': true,
-    'selected_tile': null,
-    'selected_tile_pos': null,
-    'selected_tile_prev_pos': null,
-    'rack_tiles_on_board': {},
-    'rack_tiles_on_board_idx': {}
+    redraw: true,
+    selected_tile: null,
+    selected_tile_pos: null,
+    selected_tile_prev_pos: null,
+    rack_tiles_on_board: {},
+    rack_tiles_on_board_idx: {}
 };
 var ui_immutable_state = {
-    'cell_size': 500 / 15,
-    'board_offset': [50, 10],
-    'rack_offset': [50 + (500 / 15) * 4, 530]
+    cell_size: 500 / 15,
+    board_offset: [50, 10],
+    rack_offset: [50 + (500 / 15) * 4, 530]
 };
 
 // Only used in draw_board
@@ -562,7 +562,7 @@ var ui_add_items = {
     actions : function() {
         var actions = ['play', 'swap', 'pass'];
         var el = $("#actions");
-        el.html();
+        el.html('');
         for (var i = 0; i < 3; i++)
             el.append('<li><a href="javascript:' + actions[i] + '()">'
                       + actions[i] + '</a></li>');
@@ -570,14 +570,14 @@ var ui_add_items = {
 
     generic_actions : function() {
         var el = $("#generic-actions");
-        el.html();
+        el.html('');
         el.append('<li><a href="javascript:recall_tiles()">recall</a></li>');
         el.append('<li><a href="javascript:shuffle_tiles()">shuffle</a></li>');
     },
 
     players : function() {
         var el = $('#players');
-        el.html();
+        el.html('');
         for (var i = 0; i < state.num_players; i++)
             el.append('<li>' + immutable_state.players[i].username
                       + ' - ' + state.scores[i] + '</li>');
@@ -592,7 +592,7 @@ var ui_add_items = {
             this.generic_actions();
         } else {
             this.current_player();
-            this.generic_actions();            
+            this.generic_actions();
         }
         this.players();
     }
@@ -608,6 +608,8 @@ function get_state_success(resp) {
     } else if (state !== null) {
         var new_turn_snd = new Audio(new_turn_snd_b64);
         new_turn_snd.play();
+        if (resp.current_player == immutable_state.player_num)
+            title_notification.notify('Your turn');
     }
 
     recall_tiles();
@@ -664,10 +666,60 @@ $('html').ajaxSend(function(event, xhr, settings) {
     }
 });
 
+
+var title_notification = {
+    default_title: null,
+    notification: null,
+    on_notification: false,
+    has_focus: true,
+    interval_id: null,
+
+    init: function() {
+        this.default_title = $('title').text();
+        $(window).focus(this.focus_handler);
+        $(window).blur(this.blur_handler);
+    },
+
+    notify: function(text) {
+        this.notification = text + ' :: ' + this.default_title;
+        this.on_notification = false;
+        if (!this.has_focus && this.interval_id === null)
+            this.interval_id = setInterval(this.update_title,
+                                           1000);
+    },
+
+    update_title: function() {
+        var x = title_notification; // no 'this' for some reason
+        if (x.on_notification)
+            $('title').text(x.default_title);
+        else
+            $('title').text(x.notification);
+        x.on_notification = !x.on_notification;
+    },
+
+    focus_handler: function(e) {
+        var x = title_notification; // no 'this' for some reason
+        x.has_focus = true;
+
+        if (x.interval_id === null)
+            return;
+
+        clearInterval(x.interval_id);
+        x.interval_id = null;
+        $('title').text(x.default_title);
+    },
+
+    blur_handler: function(e) {
+        title_notification.has_focus = false;
+    }
+};
+
+
 function init(game_id_) {
     canvas = document.getElementById('canvas');
     ctx = canvas.getContext('2d');
     game_id = game_id_;
+    title_notification.init();
 
     $.get('/game/' + game_id + '/immutable_state/', {},
           function (resp) {
