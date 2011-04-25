@@ -1,0 +1,33 @@
+#game {
+    text-align: center;
+}
+
+#other {
+    margin: 0 auto;
+    padding-top: 0;
+    width: 600px;
+    text-align: center;
+}
+
+#canvas {
+    padding: 0;
+    margin: 0;
+}
+
+#current-player {
+    margin-top: 0;
+}
+
+#actions, #generic-actions, #players {
+    margin-top: 5px;
+}
+
+#actions li, #generic-actions li, #players li {
+    display: inline;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+#footnote {
+    text-align: right;
+}

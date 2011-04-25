@@ -484,12 +484,6 @@ function word_in_dictionary() {
 }
 
 
-function isEmpty(map) {
-    for(var key in map)
-        if (map.hasOwnProperty(key))
-            return false;
-    return true;
-}
 
 
 function recall_tiles() {
@@ -500,6 +494,13 @@ function recall_tiles() {
 
 
 function shuffle_tiles() {
+    function isEmpty(map) {
+        for(var key in map)
+            if (map.hasOwnProperty(key))
+                return false;
+        return true;
+    }
+
     if (!isEmpty(ui_state.rack_tiles_on_board))
         return;
     for (var i = state.rack.length - 1; i > 0; i--) {
@@ -512,44 +513,91 @@ function shuffle_tiles() {
 }
 
 
-function add_generic_actions() {
-    $("#actions").append('<li><a href="javascript:recall_tiles()">recall tiles</a></li>');
-    $("#actions").append('<li><a href="javascript:shuffle_tiles()">shuffle tiles</a></li>');
-    if (state !== null) {
-        var player_list = $('<ol></ol>');
-        for (var i = 0; i < state.num_players; i++) {
-            player_list.append('<li>' + immutable_state.players[i].username +
-                               ' - ' + state.scores[i] + '</li>');
+// object containing methods to add links/info to the page
+var ui_add_items = {
+    current_player : function() {
+        var el = $('#current-player');
+        var username = immutable_state.players[state.current_player].username;
+        if (state.current_player == immutable_state.player_num)
+            el.html('Your turn');
+        else
+            el.html(username + "'s turn");
+    },
+
+    winners : function() {
+        function get_name(idx) {
+            return immutable_state.players[state.winners[idx]].username;
+        };
+        function is_winner() {
+            for (var i = 0; i < state.winners.length; i++)
+                if (state.winners[i] == immutable_state.player_num)
+                    return true;
+            return false;
+        };
+
+        var el = $('#current-player');
+        if (state.winners.length == 1) {
+            if (is_winner())
+                el.html('<p>Game over! You won!</p>');
+            else
+                el.html('<p>Game over! You lost. ' + get_name(0)
+                        + ' won.</p>');
+        } else {
+            var winner_list = $('<ul></ul>');
+            for (var i = 0; i < state.winners.length; i++)
+                if (state.winners[i] != immutable_state.player_num)
+                    winner_list.append('<li>' + get_name(i) + '</li>');
+            if (is_winner()) {
+                el.html('<p>Game over! You are a winner! You tied with:');
+                el.append(winner_list);
+                el.append('</p>');
+            } else {
+                el.html('<p>Game over! You lost! The winners are:');
+                el.append(winner_list);
+                el.append('</p>');
+            }
         }
-        $('#actions').append(player_list);
+    },
+
+    actions : function() {
+        var actions = ['play', 'swap', 'pass'];
+        var el = $("#actions");
+        el.html();
+        for (var i = 0; i < 3; i++)
+            el.append('<li><a href="javascript:' + actions[i] + '()">'
+                      + actions[i] + '</a></li>');
+    },
+
+    generic_actions : function() {
+        var el = $("#generic-actions");
+        el.html();
+        el.append('<li><a href="javascript:recall_tiles()">recall</a></li>');
+        el.append('<li><a href="javascript:shuffle_tiles()">shuffle</a></li>');
+    },
+
+    players : function() {
+        var el = $('#players');
+        el.html();
+        for (var i = 0; i < state.num_players; i++)
+            el.append('<li>' + immutable_state.players[i].username
+                      + ' - ' + state.scores[i] + '</li>');
+    },
+
+    add_items : function() {
+        if (state.winners.length != 0) {
+            this.winners();
+        } else if (state.current_player == immutable_state.player_num) {
+            this.current_player();
+            this.actions();
+            this.generic_actions();
+        } else {
+            this.current_player();
+            this.generic_actions();            
+        }
+        this.players();
     }
-}
+};
 
-
-function add_actions() {
-    var actions = ['pass', 'swap', 'play'];
-    for (var i = 0; i < 3; i++) {
-        var action = actions[i];
-        $("#actions").append('<li><a href="javascript:' + action + '()">' + action + '</a></li>');
-    }
-    add_generic_actions();
-}
-
-
-function add_winners() {
-    $('#actions').append('<li>Game over. Winners:</li>');
-    for (var i = 0; i < state.winners.length; i++) {
-        var idx = state.winners[i];
-        $('#actions').append('<li>' + immutable_state.players[idx].username + '</li>');
-    }
-}
-
-
-function add_refresh() {
-    $("#actions").append('<li>' + immutable_state.players[state.current_player].username + "'s turn</li>");
-    //$("#actions").append('<li><a href="javascript:get_state()">refresh</a></li>');
-    add_generic_actions();
-}
 
 
 function get_state_success(resp) {
@@ -564,14 +612,7 @@ function get_state_success(resp) {
 
     recall_tiles();
     state = resp;
-    $("#actions").html('');
-    if (state.winners.length != 0) {
-        add_winners();
-    } else if (state.current_player == immutable_state.player_num) {
-        add_actions();
-    } else {
-        add_refresh();
-    }
+    ui_add_items.add_items();
     board_image = undefined;
     ui_state.redraw = true;
 

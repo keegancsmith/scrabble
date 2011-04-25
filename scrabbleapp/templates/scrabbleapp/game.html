@@ -2,23 +2,30 @@
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <title>Scrabble :: {{ game.name|escape }}</title>
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}scrabble.css" />
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.min.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}json2.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}scrabble.js"></script>
   </head>
   <body>
-    <div style="text-align: center">
-      <canvas id="canvas" width="600" height="600"></canvas>
-      <ul id="actions"></ul>
-      <form method="post" action="#" onsubmit="return(word_in_dictionary())">
-        <p     id="dictionary-status">Check if a word is in the dictionary</p>
-        <input id="dictionary-word" type="text" name="word" />
-      </form>
+    <div id="game">
+      <canvas id="canvas" width="600" height="580"></canvas>
+      <div id="other">
+        <div id="current-player"></div>
+        <ul id="actions"></ul>
+        <ul id="generic-actions"></ul>
+        <form id="dictionary" method="post" action="#" onsubmit="return(word_in_dictionary())">
+          <label for="dictionary-word">Dictionary</label>
+          <input id="dictionary-word" type="text" name="word" />
+          <span id="dictionary-status"></span>
+        </form>
+        <ol id="players"></ol>
+      </div>
     </div>
-    <p style="text-align: right">
+    <div id="footnote">
       Created by <a href="http://people.cs.uct.ac.za/~ksmith/">Keegan Carruthers-Smith</a> 2011
       <a href="https://bitbucket.org/keegan_csmith/scrabble">[SRC]</a>
-    </p>
+    </div>
     <script type="text/javascript">
       init({{ game.id }});
     </script>
