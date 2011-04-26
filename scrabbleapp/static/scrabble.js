@@ -602,19 +602,41 @@ var ui_add_items = {
 
 function get_state_success(resp) {
     var changed = state === null || state.turn != resp.turn;
+    var my_turn = resp.current_player == immutable_state.player_num;
     if (!changed) {
         window.setTimeout(get_state, 0);
         return;
-    } else if (state !== null) {
+    } else if (state !== null && my_turn) {
         var new_turn_snd = new Audio(new_turn_snd_b64);
         new_turn_snd.play();
-        if (resp.current_player == immutable_state.player_num)
-            title_notification.notify('Your turn');
+        title_notification.notify('Your turn');
     }
+
+    // Save order of tiles on rack
+    var rack = state === null ? null : state.rack;
 
     recall_tiles();
     state = resp;
     ui_add_items.add_items();
+
+    function rack_has_changed() {
+        var a = rack.slice();
+        var b = state.rack.slice();
+
+        if (a.length != b.length)
+            return true;
+
+        a.sort();
+        b.sort();
+
+        for (var i = 0; i < a.length; i++)
+            if (a[i] != b[i])
+                return true;
+        return false;
+    };
+    if (rack !== null && !rack_has_changed())
+        state.rack = rack;
+
     board_image = undefined;
     ui_state.redraw = true;
 
