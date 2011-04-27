@@ -615,11 +615,10 @@ function get_state_success(resp) {
     // Save order of tiles on rack
     var rack = state === null ? null : state.rack;
 
-    recall_tiles();
     state = resp;
     ui_add_items.add_items();
 
-    function rack_has_changed() {
+    var rack_has_changed = rack === null || (function () {
         var a = rack.slice();
         var b = state.rack.slice();
 
@@ -633,9 +632,25 @@ function get_state_success(resp) {
             if (a[i] != b[i])
                 return true;
         return false;
-    };
-    if (rack !== null && !rack_has_changed())
+    })();
+    if (!rack_has_changed)
         state.rack = rack;
+
+    if (rack_has_changed) {
+        recall_tiles();
+    } else {
+        // Recall tiles on board which clash
+        // Dunno if you can delete elements in array while you are iterating
+        // over it. So storing the elments do delete in this.
+        var to_remove = [];
+        for (var k in ui_state.rack_tiles_on_board)
+            if (k in state.board)
+                to_remove.push([k, ui_state.rack_tiles_on_board[k]]);
+        for (var i in to_remove) {
+            delete ui_state.rack_tiles_on_board[to_remove[i][0]];
+            delete ui_state.rack_tiles_on_board_idx[to_remove[i][1]];
+        }
+    }
 
     board_image = undefined;
     ui_state.redraw = true;
