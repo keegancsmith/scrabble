@@ -11,21 +11,35 @@
 
 #canvas {
     padding: 0;
-    margin: 0;
+    margin: 0 auto;
 }
 
 #current-player {
     margin-top: 0;
 }
 
-#actions, #generic-actions, #players {
+.action-list, #players {
     margin-top: 5px;
+    margin-bottom: 5px;
+    padding: 0px;
 }
 
-#actions li, #generic-actions li, #players li {
+.action-list li a {
+    text-decoration: none;
+}
+
+.action-list li a:hover {
+    text-decoration: underline;
+}
+
+.action-list li, #players li {
     display: inline;
     padding-left: 10px;
     padding-right: 10px;
+}
+
+#dictionary {
+    clear: both;
 }
 
 #footnote {
