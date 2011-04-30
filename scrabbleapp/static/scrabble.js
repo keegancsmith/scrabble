@@ -291,6 +291,9 @@ function swap_tiles_on_rack(i, j) {
         ui_state.rack_tiles_on_board_idx[i] = k;
     }
 
+    if (ui_state.selected_tile == i)
+        ui_state.selected_tile = j;
+
     var tmp = state.rack[i];
     state.rack[i] = state.rack[j];
     state.rack[j] = tmp;
@@ -437,6 +440,11 @@ function mouse_move(e) {
     e.preventDefault();
 
     ui_state.selected_tile_pos = getCursorPosition(e);
+
+    var j = position_in_rack(ui_state.selected_tile_pos);
+    if (j !== null)
+        swap_tiles_on_rack(ui_state.selected_tile, j);
+
     ui_state.redraw = true;
 }
 
