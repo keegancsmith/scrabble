@@ -15,7 +15,8 @@ var ui_state = {
     selected_tile_pos: null,
     selected_tile_prev_pos: null,
     rack_tiles_on_board: {},
-    rack_tiles_on_board_idx: {}
+    rack_tiles_on_board_idx: {},
+    score: 0
 };
 var ui_immutable_state = {
     cell_size: 500 / 15,
@@ -93,6 +94,12 @@ var new_turn_snd_b64 = ('data:audio/mpeg;base64,//OAxAAAAAAAAAAAAFhpbmcAAAAPAAAA
 
 function make_key(x, y) {
     return x + ',' + y;
+}
+
+
+function make_pos(k) {
+    k = k.split(',');
+    return [parseInt(k[0]), parseInt(k[1])];
 }
 
 
@@ -260,6 +267,14 @@ function draw() {
         draw_tile(state.rack[ui_state.selected_tile],
                   ui_state.selected_tile_pos.x - ui_immutable_state.cell_size / 2,
                   ui_state.selected_tile_pos.y - ui_immutable_state.cell_size / 2);
+
+    ctx.save();
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = 'black';
+    ctx.font = 'bold 20px sans-serif';
+    ctx.fillText('Value: ' + ui_state.score, 550, 550);
+    ctx.restore();
 }
 
 
@@ -354,6 +369,8 @@ function mouse_down(e) {
         i = ui_state.rack_tiles_on_board[k];
         delete ui_state.rack_tiles_on_board[k];
         delete ui_state.rack_tiles_on_board_idx[i];
+
+        ui_state.score = calculate_score();
     }
 
     ui_state.selected_tile = i;
@@ -408,6 +425,8 @@ function mouse_up(e) {
     ui_state.rack_tiles_on_board[k] = i;
     ui_state.rack_tiles_on_board_idx[i] = k;
     ui_state.redraw = true;
+
+    ui_state.score = calculate_score();
 }
 
 
@@ -512,6 +531,119 @@ function shuffle_tiles() {
     ui_state.redraw = true;
 }
 
+
+function calculate_score() {
+    var pos = [];
+    for (var k in ui_state.rack_tiles_on_board)
+        pos.push(make_pos(k));
+
+    if (pos.length == 0)
+        return 0;
+    else if (pos.length > 1) {
+        // Check that tiles are aligned
+        for (var i in pos) {
+            var horiz = (pos[0][0] == pos[1][0]) && (pos[1][0] == pos[i][0]);
+            var vert  = (pos[0][1] == pos[1][1]) && (pos[1][1] == pos[i][1]);
+            if (!(vert || horiz))
+                return 0;
+        }
+
+        // Check that placed tiles are connected
+        pos.sort(function (a, b) {
+                     if (a[0] != b[0])
+                         return a[1] < b[1];
+                     return a[0] < b[0];
+                 });
+        for (var i = 0; i < pos.length - 1; i++) {
+            var a = pos[i];
+            var b = pos[i+1];
+            for (var j = 1; j < b[0] - a[0] + b[1] - a[1]; j++) {
+                var k;
+                if (a[0] == b[0])
+                    k = make_key(a[0], a[1] + j);
+                else
+                    k = make_key(a[0] + j, a[1]);
+                if (!(k in state.board))
+                    return 0;
+            }
+        }
+    }
+
+    var touches_existing_tile = false;
+    function get_word(r, c, dr, dc) {
+        // Find start of word
+        var k = make_key(r, c);
+        while ((k in state.board) || (k in ui_state.rack_tiles_on_board)) {
+            r -= dr;
+            c -= dc;
+            k = make_key(r, c);
+        }
+        r += dr;
+        c += dc;
+
+        // Calculate score
+        var sr = r;
+        var sc = c;
+        var word = '';
+        var word_mul = 1;
+        var score = 0;
+        k = make_key(r, c);
+        while ((k in state.board) || (k in ui_state.rack_tiles_on_board)) {
+            var letter;
+            var letter_mul = 1;
+            if (k in state.board) {
+                touches_existing_tile = true;
+                letter = state.board[k];
+            } else {
+                letter = state.rack[ui_state.rack_tiles_on_board[k]];
+                if (k in multipliers.word) {
+                    word_mul *= multipliers.word[k];
+                } else if (k in multipliers.letter) {
+                    letter_mul = multipliers.letter[k];
+                }
+            }
+
+            if (letter.toUpperCase() == letter)
+                score += letter_mul * tile_value[letter];
+            word += letter;
+
+            r += dr;
+            c += dc;
+            k = make_key(r, c);
+        }
+        score *= word_mul;
+
+        if (word.length <= 1)
+            return null;
+
+        return [word, [sr, sc], score];
+    }
+
+    var words = {};
+    for (var i in pos) {
+        var x = get_word(pos[i][0], pos[i][1], 1, 0);
+        if (x !== null)
+            words[x[0] + make_key(x[1][0], x[1][1])] = x[2];
+        x = get_word(pos[i][0], pos[i][1], 0, 1);
+        if (x !== null)
+            words[x[0] + make_key(x[1][0], x[1][1])] = x[2];
+    }
+
+    var score = 0;
+    for (var i in words) {
+        score += words[i];
+    }
+
+    // Check that we are touching a tile or if it is the first move
+    var someone_has_points = false;
+    for (var i in state.scores)
+        if (state.scores[i] != 0)
+            someone_has_points = true;
+    if (!(touches_existing_tile || !someone_has_points))
+        return 0;
+
+    return score;
+}
 
 // object containing methods to add links/info to the page
 var ui_add_items = {
@@ -640,8 +772,8 @@ function get_state_success(resp) {
         recall_tiles();
     } else {
         // Recall tiles on board which clash
-        // Dunno if you can delete elements in array while you are iterating
-        // over it. So storing the elments do delete in this.
+        // Dunno if you can delete elements in list while you are iterating
+        // over it. So storing the elements to delete in a seperate list.
         var to_remove = [];
         for (var k in ui_state.rack_tiles_on_board)
             if (k in state.board)
@@ -651,6 +783,7 @@ function get_state_success(resp) {
             delete ui_state.rack_tiles_on_board_idx[to_remove[i][1]];
         }
     }
+    ui_state.score = calculate_score();
 
     board_image = undefined;
     ui_state.redraw = true;
