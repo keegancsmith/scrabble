@@ -552,15 +552,17 @@ function calculate_score() {
         for (var i in pos) {
             var horiz = (pos[0][0] == pos[1][0]) && (pos[1][0] == pos[i][0]);
             var vert  = (pos[0][1] == pos[1][1]) && (pos[1][1] == pos[i][1]);
-            if (!(vert || horiz))
+            if (!(vert || horiz)) {
+                //console.log("Tiles are not aligned", ui_state.rack_tiles_on_board);
                 return 0;
+            }
         }
 
         // Check that placed tiles are connected
         pos.sort(function (a, b) {
-                     if (a[0] != b[0])
-                         return a[1] < b[1];
-                     return a[0] < b[0];
+                     if (a[0] == b[0])
+                         return a[1] - b[1];
+                     return a[0] - b[0];
                  });
         for (var i = 0; i < pos.length - 1; i++) {
             var a = pos[i];
@@ -571,8 +573,10 @@ function calculate_score() {
                     k = make_key(a[0], a[1] + j);
                 else
                     k = make_key(a[0] + j, a[1]);
-                if (!(k in state.board))
+                if (!(k in state.board)) {
+                    //console.log("Tiles are not connected", ui_state.rack_tiles_on_board, k, pos);
                     return 0;
+                }
             }
         }
     }
@@ -647,8 +651,10 @@ function calculate_score() {
     for (var i in state.scores)
         if (state.scores[i] != 0)
             someone_has_points = true;
-    if (!(touches_existing_tile || !someone_has_points))
+    if (!(touches_existing_tile || !someone_has_points)) {
+        //console.log("Need to touch existing tile", ui_state.rack_tiles_on_board);
         return 0;
+    }
 
     return score;
 }
