@@ -1,13 +1,57 @@
 <!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <title>Scrabble :: {{ game.name|escape }}</title>
+    <title>Scrabble :: Create Game</title>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.min.js"></script>
   </head>
   <body>
     <form action="{% url game-create %}" method="post">
       {% csrf_token %}
-      {{ form.as_p }}
-    <input type="submit" value="Submit" />
+      {{ form.non_field_errors }}
+      <p>
+        {{ form.name.errors }}
+        <label for="id_name">Name:</label>
+        {{ form.name }}
+      </p>
+      <p>
+        <label for="id_player1">Player 1:</label>
+        <select name="player1" id="id_player1">
+          <option value="" selected="selected">{{ username }}</option>
+        </select>
+      </p>
+      <p>
+        {{ form.player2.errors }}
+        <label for="id_player2">Player 2:</label>
+        <select name="player2" id="id_player2">
+          <option value="" selected="selected">---------</option>
+        </select>
+      </p>
+      <p>
+        {{ form.player3.errors }}
+        <label for="id_player3">Player 3:</label>
+        <select name="player3" id="id_player3">
+          <option value="" selected="selected">---------</option>
+        </select>
+      </p>
+      <p>
+        {{ form.player4.errors }}
+        <label for="id_player4">Player 4:</label>
+        <select name="player4" id="id_player4">
+          <option value="" selected="selected">---------</option>
+        </select>
+      </p>
+      <input type="submit" value="Submit" />
     </form>
+    <script type="text/javascript">
+<!--
+var friends = {{ friends|safe }};
+for (var i = 2; i <= 4; i++) {
+    var select = $('#id_player' + i);
+    for (var pk in friends) {
+        select.append('<option value="' + pk + '">' + friends[pk] + '</option>\n');
+    }
+}
+// -->
+    </script>
   </body>
 </html>

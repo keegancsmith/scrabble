@@ -6,9 +6,11 @@ import json
 
 from annoying.decorators import ajax_request, render_to
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.http import (HttpResponse, HttpResponseForbidden,
                          HttpResponseBadRequest, HttpResponseRedirect)
 from django.shortcuts import get_object_or_404
+from django.utils.html import escape
 from django.views.decorators.http import require_POST, require_GET
 
 def game_required(func):
@@ -37,7 +39,16 @@ def create_game(request):
     else:
         form = CreateGameForm(request.user)
 
-    return { 'form':  form }
+    # XXX need friends model
+    friends = User.objects.exclude(pk=request.user.pk)
+    friends_json = json.dumps(dict((u.pk, escape(u.username))
+                              for u in friends))
+
+    return {
+        'form': form,
+        'friends': friends_json,
+        'username': request.user.username
+    }
 
 @login_required
 def active_games(request):
