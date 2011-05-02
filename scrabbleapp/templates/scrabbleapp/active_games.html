@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>Scrabble :: Active Games</title>
+  </head>
+  <body>
+    <a href="{% url game-create %}">Create Game</a>
+    <h1>Active Games</h1>
+    <ul>
+      {% for game in my_turn %}
+      <li>Your turn in
+        <a href="{{ game.get_absolute_url }}">{{ game.name }}</a> //
+        {{ game.get_players|join:", " }}</li>
+      {% endfor %}
+
+      {% for game in other %}
+      <li>{{ game.current_player.username }}'s turn in
+        <a href="{{ game.get_absolute_url }}">{{ game.name }}</a> //
+        {{ game.get_players|join:", " }}</li>
+      {% endfor %}
+    </ul>
+    <h1>Recently Finished Games</h1>
+    <ul>
+      {% for game in recent %}
+      <li><a href="{{ game.get_absolute_url }}">{{ game.name }}</a>
+        was won by {{ game.winner }} //
+        {{ game.get_players|join:", " }}</li>
+      {% endfor %}
+    </ul>
+  </body>
+</html>

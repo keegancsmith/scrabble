@@ -51,11 +51,14 @@ def create_game(request):
     }
 
 @login_required
+@render_to('scrabbleapp/active_games.html')
 def active_games(request):
-    games = request.user.game_set.all()
-    return HttpResponse('<html><body>active_games<ul>%s</ul></body></html>' %
-                        '\n'.join('<li><a href="%s">%s</a></li>' % (g.get_absolute_url(), unicode(g))
-                                  for g in games))
+    gs = request.user.game_set
+    return {
+        'my_turn': gs.filter(winner=None).filter(current_player=request.user),
+        'other':   gs.filter(winner=None).exclude(current_player=request.user),
+        'recent':  gs.exclude(winner=None).order_by('-last_played')[:10],
+    }
 
 @game_required
 @require_GET
