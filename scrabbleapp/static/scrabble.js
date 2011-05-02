@@ -901,6 +901,11 @@ var title_notification = {
 
 function init(game_id_) {
     canvas = document.getElementById('canvas');
+
+    // Test for canvas support
+    if (canvas.getContext === undefined)
+        return;
+
     ctx = canvas.getContext('2d');
     game_id = game_id_;
     title_notification.init();
