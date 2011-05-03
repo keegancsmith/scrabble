@@ -14,6 +14,7 @@ var ui_state = {
     selected_tile: null,
     selected_tile_pos: null,
     selected_tile_prev_pos: null,
+    new_tiles: {},
     rack_tiles_on_board: {},
     rack_tiles_on_board_idx: {},
     score: 0
@@ -129,8 +130,9 @@ function draw_board() {
             var k = make_key(i, j);
 
             if (state !== null && k in state.board) {
+                var colour = k in ui_state.new_tiles ? '#8b1313' : '#8b4513';
                 draw_tile(state.board[k], i * cell_size, j * cell_size,
-                         true);
+                          colour);
                 continue;
             }
 
@@ -156,20 +158,18 @@ function draw_board() {
 }
 
 
-function draw_tile(c, x, y, moveable) {
-    if (moveable === undefined)
-        moveable = false;
+function draw_tile(c, x, y, tile_colour) {
+    if (tile_colour === undefined)
+        tile_colour = '#966f33';
 
     var cell_size = ui_immutable_state.cell_size;
-    var tile_colour = moveable ? '#8b4513' : '#966f33';
-    var text_colour = moveable ? 'white' : 'white';
 
     ctx.fillStyle = tile_colour;
     ctx.fillRect(x, y, cell_size, cell_size);
 
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillStyle = text_colour;
+    ctx.fillStyle = 'white';
     ctx.font = 'bold 16px sans-serif';
     ctx.fillText(c.toUpperCase(), x + cell_size / 2, y + cell_size / 2);
 
@@ -767,6 +767,12 @@ function get_state_success(resp) {
 
     // Save order of tiles on rack
     var rack = state === null ? null : state.rack;
+
+    ui_state.new_tiles = {};
+    if (state !== null)
+        for (var k in resp.board)
+            if (!(k in state.board))
+                ui_state.new_tiles[k] = true;
 
     state = resp;
     ui_add_items.add_items();
