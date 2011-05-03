@@ -92,6 +92,13 @@ var new_turn_snd_b64 = ('data:audio/mpeg;base64,//OAxAAAAAAAAAAAAFhpbmcAAAAPAAAA
 '/AHAAABVVVVVVVVVVVVVVVVV');
 
 
+if (typeof console == "undefined") {
+    window.console = {
+        log: function () {}
+    };
+}
+
+
 function make_key(x, y) {
     return x + ',' + y;
 }
