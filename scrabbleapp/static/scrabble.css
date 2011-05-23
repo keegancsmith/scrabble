@@ -38,10 +38,32 @@
     padding-right: 10px;
 }
 
-#dictionary {
-    clear: both;
+#footnote {
+    padding-top: 50px;
+    text-align: right;
 }
 
-#footnote {
-    text-align: right;
+#other-wrapper {
+    width: 600px;
+    margin: 0 auto;
+    padding: 0;
+}
+
+#chatarea-wrapper {
+    float: left;
+    width: 300px;
+}
+
+#chatarea-wrapper form {
+    width: 100%;
+}
+
+#chatarea-input {
+    width: 100%;
+}
+
+#chatarea {
+    text-align: left;
+    overflow: auto;
+    height: 120px;
 }

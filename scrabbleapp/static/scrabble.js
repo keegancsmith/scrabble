@@ -518,6 +518,15 @@ function word_in_dictionary() {
 }
 
 
+function post_chat() {
+    var msg = $('#chatarea-input').val();
+    $.post('/game/' + game_id + '/chat/',
+           { msg: msg },
+           function (resp) {
+               $('#chatarea-input').clear();
+           });
+    return false;
+}
 
 
 function recall_tiles() {
@@ -858,18 +867,24 @@ var notification_listener = {
         notification_listener.cursor = resp.cursor;
         window.setTimeout(notification_listener.fetch, 0);
 
-        var move_occurred = false;
-        for (var i = 0; i < resp.notifications.length; i++)
-            if (resp.notifications[i][0] == 'm')
-                move_occurred = true;
+        // Check if a move occurred
+        for (var i = 0; i < resp.notifications.length; i++) {
+            if (resp.notifications[i][0] == 'm') {
+                notification_listener.get_state();
+                break;
+            }
+        }
 
-        console.log('\n');
-        console.log('move_occurred = ', move_occurred);
-        for (var i = 0; i < resp.notifications.length; i++)
-            console.log(resp.notifications[i]);
-
-        if (move_occurred)
-            notification_listener.get_state();
+        // Add notifications to chat area
+        var chatarea = $('#chatarea');
+        var can_scroll = (chatarea[0].scrollHeight - chatarea.scrollTop()
+                          == chatarea.outerHeight());
+        for (var i = resp.notifications.length - 1; i >= 0; i--) {
+            chatarea.append(resp.notifications[i]);
+            chatarea.append('\n<hr />\n');
+        }
+        if (can_scroll)
+            chatarea.animate({scrollTop: chatarea[0].scrollHeight});
     },
 
     fetch_error: function(resp) {

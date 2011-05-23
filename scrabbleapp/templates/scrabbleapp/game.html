@@ -14,16 +14,24 @@
         <a href="http://www.mozilla.com/en-US/firefox/new/">modern</a>
         <a href="http://www.google.com/chrome/">browser</a>.
       </canvas>
-      <div id="other">
-        <div id="current-player"></div>
-        <ul id="actions" class="action-list"></ul>
-        <ul id="generic-actions" class="action-list"></ul>
-        <form id="dictionary" method="post" action="#" onsubmit="return(word_in_dictionary())">
-          <label for="dictionary-word">Dictionary</label>
-          <input id="dictionary-word" type="text" name="word" />
-          <span id="dictionary-status"></span>
-        </form>
-        <ol id="players"></ol>
+      <div id="other-wrapper">
+        <div id="chatarea-wrapper">
+          <div id="chatarea"></div>
+          <form method="post" action="#" onsubmit="return(post_chat())">
+            <input id="chatarea-input" type="text" name="message" />
+          </form>
+        </div>
+        <div id="other">
+          <div id="current-player"></div>
+          <ul id="actions" class="action-list"></ul>
+          <ul id="generic-actions" class="action-list"></ul>
+          <form id="dictionary" method="post" action="#" onsubmit="return(word_in_dictionary())">
+            <label for="dictionary-word">Dictionary</label>
+            <input id="dictionary-word" type="text" name="word" />
+            <span id="dictionary-status"></span>
+          </form>
+          <ol id="players"></ol>
+        </div>
       </div>
     </div>
     <div id="footnote">

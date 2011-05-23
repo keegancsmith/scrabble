@@ -81,7 +81,6 @@ def notification(request):
     return { 'notifications':  request.game.notification_history(cursor),
              'cursor': request.game.cursor() }
 
-
 @game_required
 @require_GET
 @ajax_request
@@ -112,6 +111,15 @@ def game_immutable_state(request):
             } for u in request.game.get_players()],
         'player_num': player_num
     }
+
+@game_required
+@require_POST
+@ajax_request
+def game_chat(request):
+    msg = request.POST['msg'].strip()
+    if msg:
+        request.game.chat(request.user, msg)
+    return { 'success': bool(msg) }
 
 @game_required
 @require_POST

@@ -10,6 +10,7 @@ urlpatterns = patterns(
     url(r'^game/(\d+)/state/$', 'game_state', name='game-state'),
     url(r'^game/(\d+)/immutable-state/$', 'game_immutable_state', name='game-immutable-state'),
     url(r'^game/(\d+)/play/$', 'game_play', name='game-play'),
+    url(r'^game/(\d+)/chat/$', 'game_chat', name='game-chat'),
     url(r'^game/(\d+)/notification/$', 'notification', name='game-notification'),
     url(r'^game/(\d+)/dictionary/$', 'word_in_dictionary', name='word-in-dictionary'),
 )

@@ -74,7 +74,7 @@ class Game(models.Model):
         return ret
 
     def chat(self, player, msg):
-        player_num = self.players_set.get(user=player).player_num
+        player_num = self.gameplayer_set.get(user=player).player_num
         pubsub.publish_chat(self.id, player_num, msg)
 
     def notification_history(self, cursor=0):
