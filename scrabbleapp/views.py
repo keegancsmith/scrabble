@@ -7,8 +7,8 @@ import json
 from annoying.decorators import ajax_request, render_to
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.http import (HttpResponse, HttpResponseForbidden,
-                         HttpResponseBadRequest, HttpResponseRedirect)
+from django.http import (HttpResponseForbidden, HttpResponseBadRequest,
+                         HttpResponseRedirect)
 from django.shortcuts import get_object_or_404
 from django.utils.html import escape
 from django.views.decorators.http import require_POST, require_GET
@@ -69,14 +69,25 @@ def get_game(request):
 @game_required
 @require_GET
 @ajax_request
+def notification(request):
+    cursor = int(request.GET.get('cursor', '-1'))
+    notifications = []
+    if 'history' not in request.GET and cursor == request.game.cursor():
+        request.game.wait()
+
+    if cursor < 0:
+        cursor = 0
+
+    return { 'notifications':  request.game.notification_history(cursor),
+             'cursor': request.game.cursor() }
+
+
+@game_required
+@require_GET
+@ajax_request
 def game_state(request):
     g = request.game.game_instance
     player_num = request.game.gameplayer_set.get(user=request.user).player_num
-
-    if 'turn' in request.GET and int(request.GET['turn']) == request.game.turn:
-        request.game.wait()
-        game = get_object_or_404(Game, pk=request.game.id)
-        g = game.game_instance
 
     return {
         'num_players': g.num_players,

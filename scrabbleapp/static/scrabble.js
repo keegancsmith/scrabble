@@ -756,10 +756,8 @@ var ui_add_items = {
 function get_state_success(resp) {
     var changed = state === null || state.turn != resp.turn;
     var my_turn = resp.current_player == immutable_state.player_num;
-    if (!changed) {
-        window.setTimeout(get_state, 0);
-        return;
-    } else if (state !== null && my_turn) {
+    error_sleep_time = 500; // Reset error sleep time
+    if (changed && state !== null && my_turn) {
         var new_turn_snd = new Audio(new_turn_snd_b64);
         new_turn_snd.play();
         title_notification.notify('Your turn');
@@ -800,7 +798,7 @@ function get_state_success(resp) {
     } else {
         // Recall tiles on board which clash
         // Dunno if you can delete elements in list while you are iterating
-        // over it. So storing the elements to delete in a seperate list.
+        // over it. So storing the elements to delete in a separate list.
         var to_remove = [];
         for (var k in ui_state.rack_tiles_on_board)
             if (k in state.board)
@@ -814,31 +812,73 @@ function get_state_success(resp) {
 
     board_image = undefined;
     ui_state.redraw = true;
-
-    window.setTimeout(get_state, 0);
 }
 
 
 function get_state_error(resp) {
     error_sleep_time *= 2;
     console.log("Poll error; sleeping for", error_sleep_time, "ms");
-    window.setTimeout(get_state, error_sleep_time);
+    window.setTimeout(notification_listener.get_state, error_sleep_time);
 }
 
 
-function get_state() {
-    var data = {};
-    if (state !== null)
-        data['turn'] = state.turn;
+var notification_listener = {
+    cursor: null,
+    error_sleep_time: 500,
 
-    $.ajax({url: '/game/' + game_id + '/state/',
-            type: 'GET',
-            dataType: 'json',
-            data: data,
-            success: get_state_success,
-            error: get_state_error});
-}
+    get_state: function() {
+        $.ajax({url: '/game/' + game_id + '/state/',
+                type: 'GET',
+                dataType: 'json',
+                data: {},
+                success: get_state_success,
+                error: get_state_error});
+    },
 
+    fetch: function() {
+        if (state === null)
+            notification_listener.get_state();
+
+        var data = {};
+        if (notification_listener.cursor !== null)
+            data['cursor'] = notification_listener.cursor;
+
+        $.ajax({url: '/game/' + game_id + '/notification/',
+                type: 'GET',
+                dataType: 'json',
+                data: data,
+                success: notification_listener.fetch_success,
+                error: notification_listener.fetch_error});
+    },
+
+    fetch_success: function(resp) {
+        console.log(resp);
+
+        notification_listener.error_sleep_time = 500;
+        notification_listener.cursor = resp.cursor;
+        window.setTimeout(notification_listener.fetch, 0);
+
+        var move_occurred = false;
+        for (var i = 0; i < resp.notifications.length; i++)
+            if (resp.notifications[i][0] == 'm')
+                move_occurred = true;
+
+        console.log('\n');
+        console.log('move_occurred = ', move_occurred);
+        for (var i = 0; i < resp.notifications.length; i++)
+            console.log(resp.notifications[i]);
+
+        if (move_occurred)
+            notification_listener.get_state();
+    },
+
+    fetch_error: function(resp) {
+        notification_listener.error_sleep_time *= 2;
+        console.log("Notification poll error; sleeping for",
+                    notification_listener.error_sleep_time, "ms");
+        window.setTimeout(notification_listener.fetch, notification_listener.error_sleep_time);
+    }
+};
 
 // Make CSRF work with AJAX in jquery
 $('html').ajaxSend(function(event, xhr, settings) {
@@ -923,10 +963,10 @@ function init(game_id_) {
     game_id = game_id_;
     title_notification.init();
 
-    $.get('/game/' + game_id + '/immutable_state/', {},
+    $.get('/game/' + game_id + '/immutable-state/', {},
           function (resp) {
               immutable_state = resp;
-              get_state();
+              window.setTimeout(notification_listener.fetch, 0);
           });
 
     var supportsTouch = 'createTouch' in document;

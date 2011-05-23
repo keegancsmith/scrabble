@@ -19,8 +19,7 @@ got_request_exception.connect(exception_printer)
 application = WSGIHandler()
 
 if __name__ == '__main__':
-    import eventlet
-    from eventlet import wsgi, patcher
+    from eventlet import wsgi
         
     print 'Serving on 8080...'
-    wsgi.server(eventlet.listen(('', 8000)), application)
+    eventlet.wsgi.server(eventlet.listen(('', 8080)), application)

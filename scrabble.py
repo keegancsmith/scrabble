@@ -301,6 +301,8 @@ class ScrabbleGame(object):
 
         self.scoreless_turn()
 
+        return len(tiles)
+
     def end_game(self):
         winning_score = max(self.scores)
         self.winners = [i for i, score in enumerate(self.scores)

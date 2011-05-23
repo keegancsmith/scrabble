@@ -48,6 +48,7 @@ class Game(models.Model):
         assert move in ('play_tiles', 'skip', 'swap')
 
         g = self.game_instance
+        player_num = g.player
         ret = getattr(g, move)(*args, **kw)
 
         # Update fields to reflect change in game state
@@ -59,12 +60,31 @@ class Game(models.Model):
             self.winner = self.get_player(g.winners[0])
 
         self.save()
-        pubsub.publish(self.id)
+
+        if move == 'play_tiles':
+            words = ('%s: %d' % (word, score) for (word, _), score
+                     in ret['words'].iteritems())
+            msg = 'scored %d points\n%s' % (ret['score'], '\n'.join(words))
+        elif move == 'skip':
+            msg = 'skipped'
+        else:
+            msg = 'swapped %d tiles' % ret
+        pubsub.publish_move(self.id, player_num, msg)
 
         return ret
 
+    def chat(self, player, msg):
+        player_num = self.players_set.get(user=player).player_num
+        pubsub.publish_chat(self.id, player_num, msg)
+
+    def notification_history(self, cursor=0):
+        return pubsub.history(self.id, cursor)
+
+    def cursor(self):
+        return pubsub.cursor(self.id)
+
     def wait(self):
-        pubsub.wait(self.id)
+        return pubsub.wait(self.id)
 
     @models.permalink
     def get_absolute_url(self):
