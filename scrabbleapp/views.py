@@ -98,7 +98,8 @@ def game_state(request):
         'current_player': g.player,
         'winners': g.winners,
         'board': pos_key_to_js_key(g.board),
-        'turn': request.game.turn
+        'turn': request.game.turn,
+        'tiles_left': g.bag.tiles_left(),
     }
 
 @game_required

@@ -680,10 +680,12 @@ var ui_add_items = {
     current_player : function() {
         var el = $('#current-player');
         var username = immutable_state.players[state.current_player].username;
+        var tiles_left = (state === null ? '' :
+                          ' - ' + state.tiles_left + ' tiles left');
         if (state.current_player == immutable_state.player_num)
-            el.html('Your turn');
+            el.html('Your turn' + tiles_left);
         else
-            el.html(username + "'s turn");
+            el.html(username + "'s turn" + tiles_left);
     },
 
     winners : function() {
