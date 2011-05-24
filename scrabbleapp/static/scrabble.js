@@ -523,7 +523,7 @@ function post_chat() {
     $.post('/game/' + game_id + '/chat/',
            { msg: msg },
            function (resp) {
-               $('#chatarea-input').clear();
+               $('#chatarea-input').val('');
            });
     return false;
 }
@@ -861,8 +861,6 @@ var notification_listener = {
     },
 
     fetch_success: function(resp) {
-        console.log(resp);
-
         notification_listener.error_sleep_time = 500;
         notification_listener.cursor = resp.cursor;
         window.setTimeout(notification_listener.fetch, 0);
@@ -879,8 +877,26 @@ var notification_listener = {
         var chatarea = $('#chatarea');
         var can_scroll = (chatarea[0].scrollHeight - chatarea.scrollTop()
                           == chatarea.outerHeight());
-        for (var i = resp.notifications.length - 1; i >= 0; i--) {
-            chatarea.append(resp.notifications[i]);
+        for (i = resp.notifications.length - 1; i >= 0; i--) {
+            var notification = resp.notifications[i];
+            var idx1 = notification.indexOf(':');
+            var idx2 = notification.indexOf(':', idx1 + 1);
+            var type = notification.substr(0, idx1);
+            var pnum = parseInt(notification.substr(idx1+1, idx2 - idx1 - 1));
+            var username = immutable_state.players[pnum].username;
+            var msg = notification.substr(idx2+1);
+
+            if (type == 'm') { // move
+                chatarea.append('<div class="notification move">'
+                                + username + ' ' + msg +
+                               '</div>');
+            } else if (type == 'c') {
+                chatarea.append('<div class="notification chatmessage">'
+                                + username + ': ' + msg +
+                               '</div>');
+            } else {
+                console.log("Unexpected msg", notification);
+            }
             chatarea.append('\n<hr />\n');
         }
         if (can_scroll)

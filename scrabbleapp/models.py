@@ -5,6 +5,7 @@ from datetime import datetime
 
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils.html import urlize
 from picklefield.fields import PickledObjectField
 
 
@@ -69,12 +70,14 @@ class Game(models.Model):
             msg = 'skipped'
         else:
             msg = 'swapped %d tiles' % ret
+        msg = urlize(msg, autoescape=True).replace('\n', '<br />')
         pubsub.publish_move(self.id, player_num, msg)
 
         return ret
 
     def chat(self, player, msg):
         player_num = self.gameplayer_set.get(user=player).player_num
+        msg = urlize(msg, autoescape=True).replace('\n', '<br />')
         pubsub.publish_chat(self.id, player_num, msg)
 
     def notification_history(self, cursor=0):
