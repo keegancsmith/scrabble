@@ -11,6 +11,7 @@ from django.http import (HttpResponseForbidden, HttpResponseBadRequest,
                          HttpResponseRedirect)
 from django.shortcuts import get_object_or_404
 from django.utils.html import escape
+from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST, require_GET
 
 def game_required(func):
@@ -66,6 +67,7 @@ def active_games(request):
 def get_game(request):
     return { 'game': request.game }
 
+@never_cache
 @game_required
 @require_GET
 @ajax_request
@@ -78,9 +80,10 @@ def notification(request):
     if cursor < 0:
         cursor = 0
 
-    return { 'notifications':  request.game.notification_history(cursor),
+    return { 'notifications': request.game.notification_history(cursor),
              'cursor': request.game.cursor() }
 
+@never_cache
 @game_required
 @require_GET
 @ajax_request
