@@ -580,11 +580,10 @@ function calculate_score() {
                          return a[1] - b[1];
                      return a[0] - b[0];
                  });
-        for (var i = 0; i < pos.length - 1; i++) {
+        for (i = 0; i < pos.length - 1; i++) {
             var a = pos[i];
             var b = pos[i+1];
             for (var j = 1; j < b[0] - a[0] + b[1] - a[1]; j++) {
-                var k;
                 if (a[0] == b[0])
                     k = make_key(a[0], a[1] + j);
                 else
@@ -644,27 +643,28 @@ function calculate_score() {
         if (word.length <= 1)
             return null;
 
-        return [word, [sr, sc], score];
+        var direction = dr == 1 ? 'down' : 'across';
+        return [word, [sr, sc], direction, score];
     }
 
     var words = {};
     for (var i in pos) {
         var x = get_word(pos[i][0], pos[i][1], 1, 0);
         if (x !== null)
-            words[x[0] + make_key(x[1][0], x[1][1])] = x[2];
+            words[x[0] + make_key(x[1][0], x[1][1]) + x[2]] = x[3];
         x = get_word(pos[i][0], pos[i][1], 0, 1);
         if (x !== null)
-            words[x[0] + make_key(x[1][0], x[1][1])] = x[2];
+            words[x[0] + make_key(x[1][0], x[1][1]) + x[2]] = x[3];
     }
 
     var score = 0;
-    for (var i in words) {
+    for (i in words) {
         score += words[i];
     }
 
     // Check that we are touching a tile or if it is the first move
     var someone_has_points = false;
-    for (var i in state.scores)
+    for (i in state.scores)
         if (state.scores[i] != 0)
             someone_has_points = true;
     if (!(touches_existing_tile || !someone_has_points)) {

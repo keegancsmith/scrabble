@@ -218,19 +218,20 @@ class ScrabbleGame(object):
             score *= word_mul
 
             if len(word) <= 1:
-                return (None, None, None)
+                return (None, None, None, None)
 
-            return (''.join(word), (sr, sc), score)
+            direction = 'down' if dr == 1 else 'across'
+            return (''.join(word), (sr, sc), direction, score)
         # XXX a lot slower than necessary
         for r, c in played_tiles:
-            word, start_pos, score = get_word(r, c, 1, 0)
+            word, start_pos, direction, score = get_word(r, c, 1, 0)
             if word is not None:
-                words[(word, start_pos)] = score
-            word, start_pos, score = get_word(r, c, 0, 1)
+                words[(word, start_pos, direction)] = score
+            word, start_pos, direction, score = get_word(r, c, 0, 1)
             if word is not None:
-                words[(word, start_pos)] = score
+                words[(word, start_pos, direction)] = score
 
-        for word, _ in words:
+        for word, _, _ in words:
             if word.upper() not in get_dictionary(self.dictionary):
                 raise IllegalMove('"%s" is not a word.' % word)
 

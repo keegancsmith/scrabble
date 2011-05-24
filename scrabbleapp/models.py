@@ -63,7 +63,7 @@ class Game(models.Model):
         self.save()
 
         if move == 'play_tiles':
-            words = ('%s: %d' % (word, score) for (word, _), score
+            words = ('%s: %d' % (word, score) for (word, _, _), score
                      in ret['words'].iteritems())
             msg = 'scored %d points\n%s' % (ret['score'], '\n'.join(words))
         elif move == 'skip':
