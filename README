@@ -9,12 +9,11 @@ Eventlet for the server. The goal is to make a scrabble clone which works on
 iOS, Android and desktop machines.
 
 There currently isn't a publicly accessible server, but you can run your own
-server. First make sure you have virtualenv and pip (on Ubuntu install
-python-virtualenv and python-pip). Also make sure you have redis (on Ubuntu
-install redis-server which will also run it on localhost). See
-example_project/settings.py if you want to change the redis settings. Then you
-can run the following commands to get a running server::
+server. Make sure you have redis running, see example_project/settings.py if
+you want to change the redis settings. Then you can run the following commands
+to get a running server::
 
+  $ sudo apt-get install python-virtualenv python-pip python-dev build-essential redis-server zip # Dependencies for Ubuntu
   $ hg clone https://bitbucket.org/keegan_csmith/scrabble
   $ cd scrabble
   $ virtualenv --no-site-packages env
