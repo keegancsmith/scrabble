@@ -2,3 +2,7 @@ syntax: glob
 *.pyc
 data/*.txt
 example_project/scrabble.db
+
+# Stuff left behind by deployment
+env/
+run/

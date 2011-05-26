@@ -39,3 +39,14 @@ If gunicorn isn't your thing, you can use eventlet.wsgi by just running::
 or use spawning::
 
   $ spawning --processes=1 --threads=0 -p 8000 run.application
+
+
+Deployment
+==========
+
+You can deploy this application using nginx and gunicorn. I use
+data/nginx.conf and data/gunicorn_conf.py for configuration. The nginx.conf
+assumes the scrabble directory is at /home/ubuntu/scrabble. To run gunicorn
+you then execute::
+
+  $ gunicorn_django -c data/gunicorn_conf.py example_project/settings.py
