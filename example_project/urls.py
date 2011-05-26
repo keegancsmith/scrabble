@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.conf.urls.defaults import patterns, include, url
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
@@ -12,3 +13,6 @@ urlpatterns = patterns(
 )
 
 urlpatterns += staticfiles_urlpatterns()
+
+if 'sentry' in settings.INSTALLED_APPS:
+    urlpatterns += patterns('', (r'^sentry/', include('sentry.web.urls')))

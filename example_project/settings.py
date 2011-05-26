@@ -156,3 +156,8 @@ LOGGING = {
         },
     }
 }
+
+try:
+    from settings_prod import *
+except:
+    pass
