@@ -13,13 +13,11 @@ if 'DJANGO_SETTINGS_MODULE' not in os.environ:
 
 def exception_printer(sender, **kwargs):
     traceback.print_exc()
-
 got_request_exception.connect(exception_printer)
 
 application = WSGIHandler()
 
 if __name__ == '__main__':
-    from eventlet import wsgi
-        
-    print 'Serving on 8080...'
-    eventlet.wsgi.server(eventlet.listen(('', 8080)), application)
+    from eventlet import monkey_patch, wsgi, listen
+    monkey_patch(thread=False)
+    wsgi.server(listen(('', 8000)), application)

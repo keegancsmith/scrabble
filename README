@@ -8,6 +8,9 @@ This is a scrabble clone which uses HTML5's Canvas for the UI and Django and
 Eventlet for the server. The goal is to make a scrabble clone which works on
 iOS, Android and desktop machines.
 
+Install
+=======
+
 There currently isn't a publicly accessible server, but you can run your own
 server. Make sure you have redis running, see example_project/settings.py if
 you want to change the redis settings. Then you can run the following commands
@@ -24,3 +27,15 @@ to get a running server::
   $ gunicorn_django -k gunicornsupport.EventletWorker example_project/settings.py
 
 You should now have a server running at http://localhost:8000/
+
+
+Alternative WSGI Servers
+------------------------
+
+If gunicorn isn't your thing, you can use eventlet.wsgi by just running::
+
+  $ python run.py
+
+or use spawning::
+
+  $ spawning --processes=1 --threads=0 -p 8000 run.application
