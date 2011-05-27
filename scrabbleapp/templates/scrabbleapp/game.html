@@ -39,7 +39,14 @@
       <a href="https://bitbucket.org/keegan_csmith/scrabble">[SRC]</a>
     </div>
     <script type="text/javascript">
-      init({{ game.id }});
+      init({
+         immutable_state: "{% url game-immutable-state game.id %}",
+         state: "{% url game-state game.id %}",
+         play: "{% url game-play game.id %}",
+         chat: "{% url game-chat game.id %}",
+         notification: "{% url game-notification game.id %}",
+         word_in_dictionary: "{% url word-in-dictionary game.id %}"
+      });
     </script>
   </body>
 </html>

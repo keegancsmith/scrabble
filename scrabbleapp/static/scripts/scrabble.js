@@ -1,6 +1,6 @@
 var canvas;
 var ctx;
-var game_id;
+var urls;
 
 // Game Logic State -- Fetched from Server
 var immutable_state = null;
@@ -457,7 +457,7 @@ function mouse_move(e) {
 
 
 function pass() {
-    $.post('/game/' + game_id + '/play/',
+    $.post(urls.play,
            { 'move': 'skip' },
            function (resp) {
                //get_state();
@@ -473,7 +473,7 @@ function swap() {
     tiles = tiles.toUpperCase().replace(/\s+/g, '').split('');
     tiles.sort();
 
-    $.post('/game/' + game_id + '/play/',
+    $.post(urls.play,
            { 'move': 'swap',
              'tiles': JSON.stringify(tiles) },
            function (resp) {
@@ -490,7 +490,7 @@ function play() {
     for (k in ui_state.rack_tiles_on_board) {
         played_tiles[k] = state.rack[ui_state.rack_tiles_on_board[k]];
     }
-    $.post('/game/' + game_id + '/play/',
+    $.post(urls.play,
            { 'move': 'play_tiles',
              'played_tiles': JSON.stringify(played_tiles) },
            function (resp) {
@@ -506,7 +506,7 @@ function play() {
 
 function word_in_dictionary() {
     var word = $('#dictionary-word').val();
-    $.post('/game/' + game_id + '/dictionary/',
+    $.post(urls.word_in_dictionary,
            { word: word },
            function (resp) {
                if (resp.in_dictionary)
@@ -520,7 +520,7 @@ function word_in_dictionary() {
 
 function post_chat() {
     var msg = $('#chatarea-input').val();
-    $.post('/game/' + game_id + '/chat/',
+    $.post(urls.chat,
            { msg: msg },
            function (resp) {
                $('#chatarea-input').val('');
@@ -838,7 +838,7 @@ var notification_listener = {
     error_sleep_time: 500,
 
     get_state: function() {
-        $.ajax({url: '/game/' + game_id + '/state/',
+        $.ajax({url: urls.state,
                 type: 'GET',
                 dataType: 'json',
                 data: {},
@@ -854,7 +854,7 @@ var notification_listener = {
         if (notification_listener.cursor !== null)
             data['cursor'] = notification_listener.cursor;
 
-        $.ajax({url: '/game/' + game_id + '/notification/',
+        $.ajax({url: urls.notification,
                 type: 'GET',
                 dataType: 'json',
                 data: data,
@@ -985,7 +985,7 @@ var title_notification = {
 };
 
 
-function init(game_id_) {
+function init(urls_) {
     canvas = document.getElementById('canvas');
 
     // Test for canvas support
@@ -993,10 +993,10 @@ function init(game_id_) {
         return;
 
     ctx = canvas.getContext('2d');
-    game_id = game_id_;
+    urls = urls_;
     title_notification.init();
 
-    $.get('/game/' + game_id + '/immutable-state/', {},
+    $.get(urls.immutable_state, {},
           function (resp) {
               immutable_state = resp;
               window.setTimeout(notification_listener.fetch, 0);
