@@ -44,9 +44,23 @@ or use spawning::
 Deployment
 ==========
 
-You can deploy this application using nginx and gunicorn. I use
-data/nginx.conf and data/gunicorn_conf.py for configuration. The nginx.conf
-assumes the scrabble directory is at /home/ubuntu/scrabble. To run gunicorn
-you then execute::
+This section will explain deployment of the example application using nginx
+and gunicorn. Follow the same steps as in the install section to setup the
+example scrabble project. The next few steps assume the repository is cloned
+into /home/ubuntu/scrabble. If it isn't you will need to modify the
+nginx.conf::
 
+  $ sudo apt-get install nginx
+  $ sudo mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak
+  $ sudo cp data/nginx.conf /etc/nginx
+  $ sudo /etc/init.d/nginx restart
+  $ cp example_project/settings_prod.example.py example_project/settings_prod.py
+  $ vim example_project/settings_prod.py # Atleast change SECRET_KEY
+  $ python example_project/manage.py syncdb
+  $ python example_project/manage.py collectstatic
   $ gunicorn_django -c data/gunicorn_conf.py example_project/settings.py
+
+You should now have a server running at http://localhost/
+
+This setup uses nginx to serve the static files, as well as reverse proxy
+requests to gunicorn.

@@ -7,3 +7,4 @@ example_project/settings_prod.py
 # Stuff left behind by deployment
 env/
 run/
+webroot/
