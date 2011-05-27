@@ -13,5 +13,5 @@ logfile = os.path.join(run_dir, 'gunicorn.log')
 pidfile = os.path.join(run_dir, 'gunicorn.pid')
 daemon = True
 
-work_class = 'gunicornsupport.EventletWorker'
+worker_class = 'gunicornsupport.EventletWorker'
 workers = multiprocessing.cpu_count() * 2 + 1
