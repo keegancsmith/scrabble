@@ -748,6 +748,11 @@ var ui_add_items = {
     },
 
     add_items : function() {
+        // Clear info fields
+        $('#current-player').html('');
+        $('#actions').html('');
+        $('#generic-actions').html('');
+
         if (state.winners.length != 0) {
             this.winners();
         } else if (state.current_player == immutable_state.player_num) {
