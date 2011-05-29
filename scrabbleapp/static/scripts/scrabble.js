@@ -530,6 +530,7 @@ function post_chat() {
 
 
 function recall_tiles() {
+    ui_state.score = 0;
     ui_state.rack_tiles_on_board = {};
     ui_state.rack_tiles_on_board_idx = {};
     ui_state.redraw = true;
