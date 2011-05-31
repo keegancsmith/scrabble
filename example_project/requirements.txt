@@ -1,0 +1,7 @@
+-r ../requirements.txt
+
+django-indexer==0.3.0
+django-paging==0.2.4
+django-sentry==1.8.5
+django-templatetag-sugar==0.1
+gunicorn==0.12.2
