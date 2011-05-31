@@ -2,10 +2,22 @@
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <title>Scrabble :: Active Games</title>
+    <style>
+      .nav { list-style: none; margin: 0; padding: 0; }
+      .nav li { display: inline; }
+      .nav li a { text-decoration: none; }
+    </style>
   </head>
   <body>
-    <a href="{% url game-create %}">Create Game</a>
-    <h1>Active Games</h1>
+    <h1>Scrabble</h1>
+    <ul class="nav">
+      <li><a href="{% url game-create %}">Create Game</a></li>
+      ::
+      <li><a href="{% url django.contrib.auth.views.logout %}">Logout</a></li>
+    </ul>
+    <h3>Hi {{ user.username }}, it is your turn in {{ my_turn.count }} out of
+    {{ other.count }} games.</h3>
+    <h2>Active Games</h2>
     <ul>
       {% for game in my_turn %}
       <li>Your turn in
@@ -19,7 +31,7 @@
         {{ game.get_players|join:", " }}</li>
       {% endfor %}
     </ul>
-    <h1>Recently Finished Games</h1>
+    <h2>Recently Finished Games</h2>
     <ul>
       {% for game in recent %}
       <li><a href="{{ game.get_absolute_url }}">{{ game.name }}</a>
