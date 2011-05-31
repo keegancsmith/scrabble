@@ -13,6 +13,7 @@ from django.shortcuts import get_object_or_404
 from django.utils.html import escape
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST, require_GET
+from uni_form.helpers import FormHelper, Submit, Reset
 
 def game_required(func):
     def f(request, game_id, *args, **kw):
@@ -40,6 +41,11 @@ def create_game(request):
     else:
         form = CreateGameForm(request.user)
 
+    # add in a submit button
+    helper = FormHelper()
+    submit = Submit('create','create a new game')
+    helper.add_input(submit)
+
     # XXX need friends model
     friends = User.objects.exclude(pk=request.user.pk)
     friends_json = json.dumps(dict((u.pk, escape(u.username))
@@ -47,6 +53,7 @@ def create_game(request):
 
     return {
         'form': form,
+        'helper': helper,
         'friends': friends_json,
         'username': request.user.username
     }

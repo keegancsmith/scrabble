@@ -131,6 +131,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.admin',
     'scrabbleapp',
+    'uni_form',
 )
 
 # A sample logging configuration. The only tangible logging

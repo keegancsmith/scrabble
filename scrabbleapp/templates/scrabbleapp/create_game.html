@@ -2,51 +2,30 @@
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <title>Scrabble :: Create Game</title>
+    <link rel="stylesheet" href="{{ STATIC_URL }}uni_form/uni-form.css" type="text/css" />
+    <link rel="stylesheet" href="{{ STATIC_URL }}uni_form/default.uni-form.css" type="text/css" />
     <script type="text/javascript" src="{{ STATIC_URL }}scripts/jquery.min.js"></script>
+    <script src="{{ STATIC_URL }}uni_form/uni-form.jquery.js" type="text/javascript"></script>
   </head>
   <body>
-    <form action="{% url game-create %}" method="post">
+{% load uni_form_tags %}
+    <div style="margin: 0 auto; width: 500px;">
+    <form action="{% url game-create %}" method="post" class="uniForm">
+      <div class="header">
+        <h2>Create Game</h2>
+        <p>Pick atleast one other person to play with.</p>
+      </div>
       {% csrf_token %}
-      {{ form.non_field_errors }}
-      <p>
-        {{ form.name.errors }}
-        <label for="id_name">Name:</label>
-        {{ form.name }}
-      </p>
-      <p>
-        <label for="id_player1">Player 1:</label>
-        <select name="player1" id="id_player1">
-          <option value="" selected="selected">{{ username }}</option>
-        </select>
-      </p>
-      <p>
-        {{ form.player2.errors }}
-        <label for="id_player2">Player 2:</label>
-        <select name="player2" id="id_player2">
-          <option value="" selected="selected">---------</option>
-        </select>
-      </p>
-      <p>
-        {{ form.player3.errors }}
-        <label for="id_player3">Player 3:</label>
-        <select name="player3" id="id_player3">
-          <option value="" selected="selected">---------</option>
-        </select>
-      </p>
-      <p>
-        {{ form.player4.errors }}
-        <label for="id_player4">Player 4:</label>
-        <select name="player4" id="id_player4">
-          <option value="" selected="selected">---------</option>
-        </select>
-      </p>
-      <input type="submit" value="Submit" />
+      {% uni_form form helper %}
     </form>
+    </div>
+
     <script type="text/javascript">
 <!--
 var friends = {{ friends|safe }};
 for (var i = 2; i <= 4; i++) {
     var select = $('#id_player' + i);
+    select.append('<option value="" selected="selected">---------</option>\n');
     for (var pk in friends) {
         select.append('<option value="' + pk + '">' + friends[pk] + '</option>\n');
     }
