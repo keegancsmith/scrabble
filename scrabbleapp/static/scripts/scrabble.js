@@ -817,7 +817,7 @@ function get_state_success(resp) {
         // Dunno if you can delete elements in list while you are iterating
         // over it. So storing the elements to delete in a separate list.
         var to_remove = [];
-        for (var k in ui_state.rack_tiles_on_board)
+        for (k in ui_state.rack_tiles_on_board)
             if (k in state.board)
                 to_remove.push([k, ui_state.rack_tiles_on_board[k]]);
         for (var i in to_remove) {

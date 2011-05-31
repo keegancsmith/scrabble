@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>Scrabble :: Lobby</title>
+{% if user.is_anonymous %}
+    <link rel="stylesheet" href="{{ STATIC_URL }}uni_form/uni-form.css" type="text/css" />
+    <link rel="stylesheet" href="{{ STATIC_URL }}uni_form/default.uni-form.css" type="text/css" />
+    <script type="text/javascript" src="{{ STATIC_URL }}scripts/jquery.min.js"></script>
+    <script src="{{ STATIC_URL }}uni_form/uni-form.jquery.js" type="text/javascript"></script>
+{% endif %}
+{% if error %}{% else %}<meta http-equiv="refresh" content="30">{% endif %}
+  </head>
+  <body>
+
+{% if error %}
+<h3>Sorry</h3>
+You cannot join this scrabble game since {{ error }}
+{% else %}{% if user.is_anonymous %}
+{% load uni_form_tags %}
+<div style="margin: 0 auto; width: 500px;">
+  <form method="post" action="/accounts/login/" class="uniForm inlineLabels">
+    <div class="header">
+      <h2>Log in</h2>
+    </div>
+
+    {% csrf_token %}
+    {{ login_form|as_uni_form }}
+    <input type="submit" value="login" />
+    <input type="hidden" name="next" value="{{ lobby.get_absolute_url }}" />
+  </form>
+<h1>or</h1>
+<form method="post" action="{% url lobby-createlazyuser lobby.uuid %}" class="uniForm inlineLabels">
+  {% csrf_token %}
+  <input type="submit" value="Play Anonymously" />
+</form>
+</div>
+{% else %}
+good day {{ user.username }}
+
+<ul>
+  {% for user in lobby.players.all %}
+  <li>{{ user.username }}</li>
+  {% endfor %}
+</ul>
+
+Once you have two or more players hit the create button.
+{% if lobby.creator == user %}
+<form action="{% url lobby-creategame lobby.uuid %}" method="post">
+{% csrf_token %}
+<input type="submit" name="create" value="create" {% if lobby.players.count < 2 %}disabled{% endif %} />
+</form>
+{% endif %}
+
+{% endif %}{% endif %}
+
+</body>
+</html>

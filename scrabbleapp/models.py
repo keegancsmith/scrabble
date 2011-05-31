@@ -28,7 +28,7 @@ class Game(models.Model):
         return self.gameplayer_set.get(player_num=player_num).user
 
     @classmethod
-    def create_game(cls, players, name):
+    def create_game(cls, players, name=None):
         if not name:
             name = "%s's game" % players[0].first_name
         game = cls(

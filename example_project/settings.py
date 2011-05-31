@@ -112,6 +112,11 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
 )
 
+AUTHENTICATION_BACKENDS = (
+  'django.contrib.auth.backends.ModelBackend',
+  'lazysignup.backends.LazySignupBackend',
+)
+
 ROOT_URLCONF = 'example_project.urls'
 
 TEMPLATE_DIRS = (
@@ -130,8 +135,10 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.admin',
-    'scrabbleapp',
     'uni_form',
+    'lazysignup',
+    'example_project.lazynewgame',
+    'scrabbleapp',
 )
 
 # A sample logging configuration. The only tangible logging
