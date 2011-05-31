@@ -1,18 +1,13 @@
+import sys
+globals().update(vars(sys.modules['example_project.settings']))
+
 DEBUG = False
 TEMPLATE_DEBUG = True
 
 # Add django-sentry
-INSTALLED_APPS = (
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.sites',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'django.contrib.admin',
+INSTALLED_APPS += (
     'sentry',
     'sentry.client',
-    'scrabbleapp',
 )
 
 # Change the secret key from the one used in settings.py since that is public
