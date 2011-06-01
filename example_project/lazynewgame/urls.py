@@ -5,5 +5,5 @@ urlpatterns = patterns(
     url(r'^new/$', 'new_lobby', name='lobby-new'),
     url(r'^([^/]+)/$', 'lobby', name='lobby'),
     url(r'^([^/]+)/create/$', 'create_game', name='lobby-creategame'),
-    url(r'^([^/]+)/create-lazy-user/$', 'create_lazy_user', name='lobby-createlazyuser'),
+    url(r'^([^/]+)/join/$', 'join', name='lobby-join'),
 )

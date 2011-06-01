@@ -35,10 +35,7 @@ def lobby(request, uuid):
             'login_form': AuthenticationForm(),
         }
 
-    if request.user.is_authenticated() and not in_game:
-        gl.add_player(request.user)
-
-    return { 'lobby': gl }
+    return { 'lobby': gl, 'in_game': in_game }
 
 @require_POST
 @login_required
@@ -54,14 +51,17 @@ def create_game(request, uuid):
     g = gl.create_game()
     return HttpResponseRedirect(g.get_absolute_url())
 
-@require_POST
-def create_lazy_user(request, uuid):
+def join(request, uuid):
     gl = get_object_or_404(GameLobby, uuid=uuid)
 
     # We only want to create the user if the url exists, but if we use
     # allow_lazy_user as a decorator it will create the user even if the url
     # doesnt exist. So this is a hack to get at the function inside of the
     # decorator
-    return allow_lazy_user(
-        lambda _ : HttpResponseRedirect(gl.get_absolute_url())
-    )(request)
+    @allow_lazy_user
+    def do_join(request):
+        if gl.user_can_join(request.user):
+            gl.add_player(request.user)
+        return HttpResponseRedirect(gl.get_absolute_url())
+
+    return do_join(request)

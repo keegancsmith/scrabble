@@ -30,16 +30,21 @@ class GameLobby(models.Model):
     def game_started(self):
         return self.game is not None
 
+    def user_can_join(self, user):
+        return not self.is_full() and user not in self.players.all()
+
     def is_full(self):
         return self.players.count() >= 4
 
     def add_player(self, user):
-        assert not self.is_full()
+        player_num = self.players.count()
+        assert self.user_can_join(user)
+        assert player_num < 4
 
         return GameLobbyPlayer.objects.create(
             user=user,
             game_lobby=self,
-            player_num=self.players.count())
+            player_num=player_num)
 
     def create_game(self):
         assert self.game == None
@@ -51,7 +56,7 @@ class GameLobby(models.Model):
 class GameLobbyPlayer(models.Model):
     user = models.ForeignKey(User)
     game_lobby = models.ForeignKey(GameLobby)
-    player_num = models.IntegerField()
+    player_num = models.IntegerField(unique=True)
 
     class Meta:
         ordering = ['player_num']

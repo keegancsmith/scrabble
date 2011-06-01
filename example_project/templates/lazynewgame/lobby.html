@@ -18,6 +18,7 @@ You cannot join this scrabble game since {{ error }}
 {% else %}{% if user.is_anonymous %}
 {% load uni_form_tags %}
 <div style="margin: 0 auto; width: 500px;">
+  <p>Good day, would you like to play a game of scrabble?</p>
   <form method="post" action="/accounts/login/" class="uniForm inlineLabels">
     <div class="header">
       <h2>Log in</h2>
@@ -26,25 +27,37 @@ You cannot join this scrabble game since {{ error }}
     {% csrf_token %}
     {{ login_form|as_uni_form }}
     <input type="submit" value="login" />
-    <input type="hidden" name="next" value="{{ lobby.get_absolute_url }}" />
+    <input type="hidden" name="next" value="{% url lobby-join lobby.uuid %}" />
   </form>
 <h1>or</h1>
-<form method="post" action="{% url lobby-createlazyuser lobby.uuid %}" class="uniForm inlineLabels">
+<form method="post" action="{% url lobby-join lobby.uuid %}" class="uniForm inlineLabels">
   {% csrf_token %}
   <input type="submit" value="Play Anonymously" />
 </form>
 </div>
 {% else %}
-good day {{ user.username }}
 
+{% if in_game %}
+<p>Good day {{ user.username }}, we are waiting for
+{% if lobby.creator == user %}you{% else %}{{ lobby.creator }}{% endif %}
+to hit the create button when there are enough players.</p>
+{% else %}
+<p>Good day {{ user.username }}, would you like to play a game of scrabble?</p>
+<form method="post" action="{% url lobby-join lobby.uuid %}">
+  {% csrf_token %}
+  <input type="submit" value="Play" />
+</form>
+{% endif %}
+
+<h4>Current players:</h4>
 <ul>
   {% for user in lobby.players.all %}
   <li>{{ user.username }}</li>
   {% endfor %}
 </ul>
 
-Once you have two or more players hit the create button.
 {% if lobby.creator == user %}
+Once you have two or more players hit the create button.
 <form action="{% url lobby-creategame lobby.uuid %}" method="post">
 {% csrf_token %}
 <input type="submit" name="create" value="create" {% if lobby.players.count < 2 %}disabled{% endif %} />
