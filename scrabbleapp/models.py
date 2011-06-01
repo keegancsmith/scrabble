@@ -30,7 +30,7 @@ class Game(models.Model):
     @classmethod
     def create_game(cls, players, name=None):
         if not name:
-            name = "%s's game" % players[0].first_name
+            name = "%s's game" % players[0].username
         game = cls(
             name=name,
             current_player=players[0],
