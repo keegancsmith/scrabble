@@ -460,7 +460,7 @@ function pass() {
     $.post(urls.play,
            { 'move': 'skip' },
            function (resp) {
-               //get_state();
+               notification_listener.reset_error_timer(true);
            });
 }
 
@@ -479,8 +479,9 @@ function swap() {
            function (resp) {
                if ('illegal_move' in resp) {
                    alert('Illegal Move: ' + resp.illegal_move);
+               } else {
+                   notification_listener.reset_error_timer(true);
                }
-               //get_state();
            });
 }
 
@@ -497,7 +498,7 @@ function play() {
                if ('illegal_move' in resp) {
                    alert('Illegal Move: ' + resp.illegal_move);
                } else {
-                   //get_state();
+                   notification_listener.reset_error_timer(true);
                    alert('You scored ' + resp.score + ' points');
                }
            });
@@ -524,6 +525,7 @@ function post_chat() {
            { msg: msg },
            function (resp) {
                $('#chatarea-input').val('');
+               notification_listener.reset_error_timer(true);
            });
     return false;
 }
@@ -841,6 +843,7 @@ function get_state_error(resp) {
 
 var notification_listener = {
     cursor: null,
+    error_timer: null,
     error_sleep_time: 500,
 
     get_state: function() {
@@ -850,6 +853,21 @@ var notification_listener = {
                 data: {},
                 success: get_state_success,
                 error: get_state_error});
+    },
+
+    reset_error_timer: function(refetch) {
+        notification_listener.error_sleep_time = 500;
+        if (notification_listener.error_timer !== null) {
+            console.log("reset timer while doing timeout");
+            window.clearTimeout(notification_listener.error_timer);
+            notification_listener.error_timer = null;
+
+            if (refetch === true)
+                window.setTimeout(notification_listener.fetch, 0);
+
+            return true;
+        }
+        return false;
     },
 
     fetch: function() {
@@ -869,7 +887,7 @@ var notification_listener = {
     },
 
     fetch_success: function(resp) {
-        notification_listener.error_sleep_time = 500;
+        notification_listener.reset_error_timer();
         notification_listener.cursor = resp.cursor;
         window.setTimeout(notification_listener.fetch, 0);
 
@@ -912,10 +930,12 @@ var notification_listener = {
     },
 
     fetch_error: function(resp) {
-        notification_listener.error_sleep_time *= 2;
+        var self = notification_listener;
+        self.error_sleep_time *= 2;
         console.log("Notification poll error; sleeping for",
-                    notification_listener.error_sleep_time, "ms");
-        window.setTimeout(notification_listener.fetch, notification_listener.error_sleep_time);
+                    self.error_sleep_time, "ms");
+        self.error_timer = window.setTimeout(self.fetch,
+                                             self.error_sleep_time);
     }
 };
 
