@@ -488,9 +488,9 @@ function swap() {
 
 function play() {
     var played_tiles = {};
-    for (k in ui_state.rack_tiles_on_board) {
-        played_tiles[k] = state.rack[ui_state.rack_tiles_on_board[k]];
-    }
+    $.each(ui_state.rack_tiles_on_board, function(k, rack_idx) {
+        played_tiles[k] = state.rack[rack_idx];
+    });
     $.post(urls.play,
            { 'move': 'play_tiles',
              'played_tiles': JSON.stringify(played_tiles) },
@@ -540,14 +540,7 @@ function recall_tiles() {
 
 
 function shuffle_tiles() {
-    function isEmpty(map) {
-        for(var key in map)
-            if (map.hasOwnProperty(key))
-                return false;
-        return true;
-    }
-
-    if (!isEmpty(ui_state.rack_tiles_on_board))
+    if (!$.isEmptyObject(ui_state.rack_tiles_on_board))
         return;
     for (var i = state.rack.length - 1; i > 0; i--) {
         var j = Math.floor(Math.random() * (i + 1));
