@@ -856,14 +856,14 @@ var notification_listener = {
     },
 
     reset_error_timer: function(refetch) {
-        notification_listener.error_sleep_time = 500;
-        if (notification_listener.error_timer !== null) {
+        this.error_sleep_time = 500;
+        if (this.error_timer !== null) {
             console.log("reset timer while doing timeout");
-            window.clearTimeout(notification_listener.error_timer);
-            notification_listener.error_timer = null;
+            window.clearTimeout(this.error_timer);
+            this.error_timer = null;
 
             if (refetch === true)
-                window.setTimeout(notification_listener.fetch, 0);
+                window.setTimeout($.proxy(this, 'fetch'), 0);
 
             return true;
         }
@@ -872,29 +872,30 @@ var notification_listener = {
 
     fetch: function() {
         if (state === null)
-            notification_listener.get_state();
+            this.get_state();
 
         var data = {};
-        if (notification_listener.cursor !== null)
-            data['cursor'] = notification_listener.cursor;
+        if (this.cursor !== null)
+            data['cursor'] = this.cursor;
 
         $.ajax({url: urls.notification,
                 type: 'GET',
                 dataType: 'json',
                 data: data,
-                success: notification_listener.fetch_success,
-                error: notification_listener.fetch_error});
+                context: this,
+                success: this.fetch_success,
+                error: this.fetch_error});
     },
 
     fetch_success: function(resp) {
-        notification_listener.reset_error_timer();
-        notification_listener.cursor = resp.cursor;
-        window.setTimeout(notification_listener.fetch, 0);
+        this.reset_error_timer();
+        this.cursor = resp.cursor;
+        window.setTimeout($.proxy(this, 'fetch'), 0);
 
         // Check if a move occurred
         for (var i = 0; i < resp.notifications.length; i++) {
             if (resp.notifications[i][0] == 'm') {
-                notification_listener.get_state();
+                this.get_state();
                 break;
             }
         }
@@ -930,12 +931,11 @@ var notification_listener = {
     },
 
     fetch_error: function(resp) {
-        var self = notification_listener;
-        self.error_sleep_time *= 2;
         console.log("Notification poll error; sleeping for",
-                    self.error_sleep_time, "ms");
-        self.error_timer = window.setTimeout(self.fetch,
-                                             self.error_sleep_time);
+                    this.error_sleep_time, "ms");
+        this.error_timer = window.setTimeout($.proxy(this, 'fetch'),
+                                             this.error_sleep_time);
+        this.error_sleep_time *= 2;
     }
 };
 
@@ -972,41 +972,39 @@ var title_notification = {
 
     init: function() {
         this.default_title = $('title').text();
-        $(window).focus(this.focus_handler);
-        $(window).blur(this.blur_handler);
+        $(window).focus($.proxy(this, 'focus_handler'));
+        $(window).blur($.proxy(this, 'blur_handler'));
     },
 
     notify: function(text) {
         this.notification = text + ' :: ' + this.default_title;
         this.on_notification = false;
         if (!this.has_focus && this.interval_id === null)
-            this.interval_id = setInterval(this.update_title,
+            this.interval_id = setInterval($.proxy(this, 'update_title'),
                                            1000);
     },
 
     update_title: function() {
-        var x = title_notification; // no 'this' for some reason
-        if (x.on_notification)
-            $('title').text(x.default_title);
+        if (this.on_notification)
+            $('title').text(this.default_title);
         else
-            $('title').text(x.notification);
-        x.on_notification = !x.on_notification;
+            $('title').text(this.notification);
+        this.on_notification = !this.on_notification;
     },
 
     focus_handler: function(e) {
-        var x = title_notification; // no 'this' for some reason
-        x.has_focus = true;
+        this.has_focus = true;
 
-        if (x.interval_id === null)
+        if (this.interval_id === null)
             return;
 
-        clearInterval(x.interval_id);
-        x.interval_id = null;
-        $('title').text(x.default_title);
+        clearInterval(this.interval_id);
+        this.interval_id = null;
+        $('title').text(this.default_title);
     },
 
     blur_handler: function(e) {
-        title_notification.has_focus = false;
+        this.has_focus = false;
     }
 };
 
@@ -1025,7 +1023,7 @@ function init(urls_) {
     $.get(urls.immutable_state, {},
           function (resp) {
               immutable_state = resp;
-              window.setTimeout(notification_listener.fetch, 0);
+              window.setTimeout($.proxy(notification_listener, 'fetch'), 0);
           });
 
     var supportsTouch = 'createTouch' in document;
