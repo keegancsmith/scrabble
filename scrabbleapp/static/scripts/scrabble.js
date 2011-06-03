@@ -864,9 +864,6 @@ var notification_listener = {
     },
 
     fetch: function() {
-        if (this.cursor !== null && state === null)
-            this.get_state();
-
         var data = {};
         if (this.cursor !== null)
             data['cursor'] = this.cursor;
@@ -885,11 +882,15 @@ var notification_listener = {
         this.cursor = resp.cursor;
         window.setTimeout($.proxy(this, 'fetch'), 0);
 
-        // Check if a move occurred
-        for (var i = 0; i < resp.notifications.length; i++) {
-            if (resp.notifications[i][0] == 'm') {
-                this.get_state();
-                break;
+        if (state === null) {
+            this.get_state();
+        } else {
+            // Check if a move occurred
+            for (var i = 0; i < resp.notifications.length; i++) {
+                if (resp.notifications[i][0] == 'm') {
+                    this.get_state();
+                    break;
+                }
             }
         }
 
