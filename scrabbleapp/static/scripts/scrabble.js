@@ -644,7 +644,7 @@ function calculate_score() {
     }
 
     var words = {};
-    for (var i in pos) {
+    for (i in pos) {
         var x = get_word(pos[i][0], pos[i][1], 1, 0);
         if (x !== null)
             words[x[0] + make_key(x[1][0], x[1][1]) + x[2]] = x[3];
@@ -828,9 +828,9 @@ function get_state_success(resp) {
 
 
 function get_state_error(resp) {
-    error_sleep_time *= 2;
     console.log("Poll error; sleeping for", error_sleep_time, "ms");
     window.setTimeout(notification_listener.get_state, error_sleep_time);
+    error_sleep_time *= 2;
 }
 
 
@@ -864,7 +864,7 @@ var notification_listener = {
     },
 
     fetch: function() {
-        if (state === null)
+        if (this.cursor !== null && state === null)
             this.get_state();
 
         var data = {};
