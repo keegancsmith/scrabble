@@ -1,12 +1,14 @@
+from forms import LazyUserCreationForm
 from models import GameLobby
 
 from annoying.decorators import render_to
+from django.contrib.auth import SESSION_KEY, authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
+from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST
-from lazysignup.decorators import allow_lazy_user
 
 
 @login_required
@@ -30,9 +32,22 @@ def lobby(request, uuid):
         return HttpResponseRedirect(gl.game.get_absolute_url())
 
     if request.user.is_anonymous():
+        if request.method == 'POST':
+            lazy_form = LazyUserCreationForm(request.POST)
+            if lazy_form.is_valid():
+                username = lazy_form.save()
+                # Setup user session. From lazysignup.decorators
+                request.user = None
+                user = authenticate(username=username)
+                request.session[SESSION_KEY] = user.id
+                login(request, user)
+                return HttpResponseRedirect(reverse('lobby-join', args=[uuid]))
+        else:
+            lazy_form = LazyUserCreationForm()
         return {
             'lobby': gl,
             'login_form': AuthenticationForm(),
+            'lazy_form': lazy_form,
         }
 
     return { 'lobby': gl, 'in_game': in_game }
@@ -54,14 +69,6 @@ def create_game(request, uuid):
 def join(request, uuid):
     gl = get_object_or_404(GameLobby, uuid=uuid)
 
-    # We only want to create the user if the url exists, but if we use
-    # allow_lazy_user as a decorator it will create the user even if the url
-    # doesnt exist. So this is a hack to get at the function inside of the
-    # decorator
-    @allow_lazy_user
-    def do_join(request):
-        if gl.user_can_join(request.user):
-            gl.add_player(request.user)
-        return HttpResponseRedirect(gl.get_absolute_url())
-
-    return do_join(request)
+    if gl.user_can_join(request.user):
+        gl.add_player(request.user)
+    return HttpResponseRedirect(gl.get_absolute_url())
