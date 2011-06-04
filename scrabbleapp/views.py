@@ -13,7 +13,7 @@ from django.shortcuts import get_object_or_404
 from django.utils.html import escape
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST, require_GET
-from uni_form.helpers import FormHelper, Submit, Reset
+from uni_form.helpers import FormHelper, Submit
 
 def game_required(func):
     def f(request, game_id, *args, **kw):
@@ -81,7 +81,6 @@ def get_game(request):
 @ajax_request
 def notification(request):
     cursor = int(request.GET.get('cursor', '-1'))
-    notifications = []
     if 'history' not in request.GET and cursor == request.game.cursor():
         request.game.wait()
 
