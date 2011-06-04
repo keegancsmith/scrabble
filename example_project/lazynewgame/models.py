@@ -78,10 +78,11 @@ class GameLobby(models.Model):
 class GameLobbyPlayer(models.Model):
     user = models.ForeignKey(User)
     game_lobby = models.ForeignKey(GameLobby)
-    player_num = models.IntegerField(unique=True)
+    player_num = models.IntegerField()
 
     class Meta:
         ordering = ['player_num']
+        unique_together = ("game_lobby", "player_num")
 
     def __unicode__(self):
         return u'%d %s' % (self.player_num, self.user.username)
