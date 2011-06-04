@@ -10,7 +10,7 @@ class LazyUserCreationForm(forms.Form):
     (instead of 30) and the `-` character is not allowed. This is so that we
     can add the suffix -num to it.'''
 
-    username = forms.RegexField(label="Nickname", max_length=25, regex=r'^[\w.@+]+$',
+    username = forms.RegexField(label="Nickname", initial='anon', max_length=25, regex=r'^[\w.@+]+$',
         help_text = "Required. 25 characters or fewer. Letters, digits and @/./+/_ only.",
         error_messages = {'invalid': "This value may contain only letters, numbers and @/./+/_ characters."})
 
