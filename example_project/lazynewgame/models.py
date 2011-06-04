@@ -1,14 +1,36 @@
 from scrabbleapp.models import Game
 
 from datetime import datetime
+from string import ascii_letters, digits
 from uuid import uuid4
 
 from django.contrib.auth.models import User
 from django.db import models
 
 
+def _create_uuid():
+    '''Creates a string representing a shortened UUID
+
+    The reason the UUID is shortened to create prettier urls, instead of
+    massive hex representations of an 128-bit number. However, this means that
+    a UUID is likely to be unique.
+    '''
+    chars = ascii_letters + digits
+    uuid = uuid4()
+
+    # 32 bits should be enough
+    x = uuid.int % 2**32
+    uuid_str = []
+    while x:
+        uuid_str.append(chars[x % len(chars)])
+        x /= len(chars)
+    return ''.join(uuid_str)
+
+
 class GameLobby(models.Model):
-    uuid = models.CharField(max_length=32, default=lambda:uuid4().hex,
+    # uuid is set to unique, but it can collide with another row's
+    # uuid. Ignore this possibility for now for when it actually occurs.
+    uuid = models.CharField(max_length=32, default=_create_uuid,
                             editable=False, unique=True)
     game = models.ForeignKey(Game, null=True)
     date_created = models.DateTimeField(default=datetime.now)
@@ -16,7 +38,7 @@ class GameLobby(models.Model):
 
     def __unicode__(self):
         players = ','.join(p.username for p in self.players.all())
-        return u'Game Lobby %s with [%s]' (self.uuid, players)
+        return u'Game Lobby %s with [%s]' % (self.uuid, players)
 
     @models.permalink
     def get_absolute_url(self):
@@ -60,3 +82,6 @@ class GameLobbyPlayer(models.Model):
 
     class Meta:
         ordering = ['player_num']
+
+    def __unicode__(self):
+        return u'%d %s' % (self.player_num, self.user.username)
