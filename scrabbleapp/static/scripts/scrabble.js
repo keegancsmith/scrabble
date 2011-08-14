@@ -526,10 +526,10 @@ function word_in_dictionary() {
 
 function post_chat() {
     var msg = $('#chatarea-input').val();
+    $('#chatarea-input').val('');
     $.post(urls.chat,
            { msg: msg },
            function (resp) {
-               $('#chatarea-input').val('');
                notification_listener.reset_error_timer(true);
            });
     return false;
@@ -903,7 +903,7 @@ var notification_listener = {
         var chatarea = $('#chatarea');
         var can_scroll = (chatarea[0].scrollHeight - chatarea.scrollTop()
                           == chatarea.outerHeight());
-        for (i = resp.notifications.length - 1; i >= 0; i--) {
+        for (var i = resp.notifications.length - 1; i >= 0; i--) {
             var notification = resp.notifications[i];
             var idx1 = notification.indexOf(':');
             var idx2 = notification.indexOf(':', idx1 + 1);
