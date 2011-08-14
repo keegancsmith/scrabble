@@ -487,6 +487,11 @@ function swap() {
 
 
 function play() {
+    if ($.isEmptyObject(ui_state.rack_tiles_on_board)) {
+        alert('Place tiles on board before playing');
+        return;
+    }
+
     var played_tiles = {};
     $.each(ui_state.rack_tiles_on_board, function(k, rack_idx) {
         played_tiles[k] = state.rack[rack_idx];
