@@ -61,12 +61,12 @@ def create_game(request):
 @login_required
 @render_to('scrabbleapp/active_games.html')
 def active_games(request):
-    playing_qs = request.user.game_set.filter(winner=None)
-    played_qs  = request.user.game_set.exclude(winner=None)
+    active_qs = request.user.game_set.filter(active=True)
+    inactive_qs = request.user.game_set.filter(active=False)
     return {
-        'my_turn': playing_qs.filter(current_player=request.user),
-        'other':   playing_qs.exclude(current_player=request.user),
-        'recent':  played_qs.exclude(winner=None).order_by('-last_played')[:10],
+        'my_turn': active_qs.filter(current_player=request.user),
+        'other':   active_qs.exclude(current_player=request.user),
+        'recent':  inactive_qs.order_by('-last_played')[:10],
     }
 
 @game_required

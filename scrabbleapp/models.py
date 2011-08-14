@@ -12,8 +12,6 @@ from picklefield.fields import PickledObjectField
 class Game(models.Model):
     name = models.CharField(max_length=50)
     players = models.ManyToManyField(User, through='GamePlayer')
-    winner = models.ForeignKey(User, null=True, blank=True, default=None,
-                               related_name='winner')
     current_player = models.ForeignKey(User, related_name='playing')
     active = models.BooleanField(default=True)
     date_created = models.DateTimeField(default=datetime.now)
@@ -26,6 +24,10 @@ class Game(models.Model):
 
     def get_player(self, player_num):
         return self.gameplayer_set.get(player_num=player_num).user
+
+    def get_winners(self):
+        return self.players.filter(gameplayer__winner=True) \
+                           .order_by('gameplayer__player_num')
 
     @classmethod
     def create_game(cls, players, name=None):
@@ -57,8 +59,9 @@ class Game(models.Model):
         self.last_played = datetime.now()
         self.turn += 1
         if g.winners:
-            # XXX currently don't support multiple winners
-            self.winner = self.get_player(g.winners[0])
+            for winner in g.winners:
+                self.gameplayer_set.get(player_num=winner).winner = True
+            self.active = False
 
         self.save()
 
@@ -101,8 +104,8 @@ class Game(models.Model):
             else:
                 return unicode(p)
         players_str = u', '.join(map(mark_current_player, self.get_players()))
-        if self.winner is not None:
-            game_str += u' won by %s' % unicode(self.winner)
+        if not self.active:
+            game_str += u' completed'
         return u'%s %s' % (game_str, players_str)
 
 
@@ -110,6 +113,7 @@ class GamePlayer(models.Model):
     user = models.ForeignKey(User)
     game = models.ForeignKey(Game)
     player_num = models.IntegerField()
+    winner = models.BooleanField(default=False)
 
     def __unicode__(self):
         return u'Player %d %s in game %d' % (self.player_num, self.user,

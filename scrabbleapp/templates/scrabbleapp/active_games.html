@@ -35,7 +35,7 @@
     <ul>
       {% for game in recent %}
       <li><a href="{{ game.get_absolute_url }}">{{ game.name }}</a>
-        was won by {{ game.winner }} //
+        was won by {{ game.get_winners|join:", " }} //
         {{ game.get_players|join:", " }}</li>
       {% endfor %}
     </ul>

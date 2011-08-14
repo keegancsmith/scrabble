@@ -7,3 +7,4 @@ django-sentry==1.8.6.2
 django-templatetag-sugar==0.1
 django-uni-form==0.8.0
 gunicorn==0.12.2
+South==0.7.3

@@ -137,6 +137,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'uni_form',
     'lazysignup',
+    'south',
     'example_project.lazynewgame',
     'scrabbleapp',
 )
