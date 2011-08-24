@@ -60,7 +60,9 @@ class Game(models.Model):
         self.turn += 1
         if g.winners:
             for winner in g.winners:
-                self.gameplayer_set.get(player_num=winner).winner = True
+                gp = self.gameplayer_set.get(player_num=winner)
+                gp.winner = True
+                gp.save()
             self.active = False
 
         self.save()
