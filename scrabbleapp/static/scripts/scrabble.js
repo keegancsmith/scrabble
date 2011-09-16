@@ -667,6 +667,9 @@ function calculate_score() {
     for (i in words) {
         score += words[i];
     }
+    if (pos.length == 7) {
+        score += 50;
+    }
 
     // Check that we are touching a tile or if it is the first move
     var someone_has_points = false;
