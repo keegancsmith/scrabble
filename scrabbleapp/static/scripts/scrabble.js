@@ -545,10 +545,15 @@ function recall_tiles() {
 
 
 function shuffle_tiles() {
-    if (!$.isEmptyObject(ui_state.rack_tiles_on_board))
-        return;
     for (var i = state.rack.length - 1; i > 0; i--) {
-        var j = Math.floor(Math.random() * (i + 1));
+        if (i in ui_state.rack_tiles_on_board_idx)
+            continue;
+
+        var j;
+        do {
+            j = Math.floor(Math.random() * (i + 1));
+        } while (j in ui_state.rack_tiles_on_board_idx);
+
         var tmp = state.rack[i];
         state.rack[i] = state.rack[j];
         state.rack[j] = tmp;
