@@ -404,6 +404,7 @@ function toggle_typing_cursor(k) {
         disable_typing_cursor();
     }
 
+    canvas.focus();
     ui_state.typing_position = k;
     switch (ui_state.typing_direction) {
         case null:
@@ -413,8 +414,7 @@ function toggle_typing_cursor(k) {
            ui_state.typing_direction = 1;
            break;
         case 1:
-            ui_state.typing_direction = null;
-            ui_state.typing_position = null;
+            disable_typing_cursor();
             break;
     }
 
@@ -430,12 +430,35 @@ function advance_typing_cursor() {
     var pos = make_pos(key);
     do {
         pos[ui_state.typing_direction]++;
-        if (pos[ui_state.typing_direction] >= 15) {
+        if (pos[ui_state.typing_direction] > 14) {
             disable_typing_cursor();
             return;
         }
         key = make_key(pos[0], pos[1]);
     } while (key in state.board || key in ui_state.rack_tiles_on_board);
+    ui_state.typing_position = key;
+    ui_state.redraw = true;
+}
+
+function backspace_typing_cursor() {
+    if (ui_state.typing_position === null)
+        return;
+
+    var key = ui_state.typing_position;
+    var pos = make_pos(key);
+    do {
+        pos[ui_state.typing_direction]--;
+        if (pos[ui_state.typing_direction] < 0) {
+            disable_typing_cursor();
+            return;
+        }
+        key = make_key(pos[0], pos[1]);
+    } while (key in state.board);
+    if (key in ui_state.rack_tiles_on_board) {
+        var i = ui_state.rack_tiles_on_board[key];
+        delete ui_state.rack_tiles_on_board[key];
+        delete ui_state.rack_tiles_on_board_idx[i];
+    }
     ui_state.typing_position = key;
     ui_state.redraw = true;
 }
@@ -474,6 +497,38 @@ function mouse_down(e) {
     e.preventDefault();
 }
 
+
+function is_blank(tile) {
+    return tile.toLowerCase() == tile;
+}
+
+
+function place_tile(tile, key, blank_letter) {
+    if (is_blank(state.rack[tile])) {
+        if (!blank_letter) {
+            var choice = window.prompt('Which letter do you want to place?');
+            if (choice === null) {
+                return;
+            } else if (! /^[a-zA-Z]$/.test(choice)) {
+                alert('Must input a single letter!');
+                return;
+            } else {
+                blank_letter = choice[0].toLowerCase();
+            }
+        }
+        state.rack[tile] = blank_letter;
+    }
+
+    ui_state.rack_tiles_on_board[key] = tile;
+    ui_state.rack_tiles_on_board_idx[tile] = key;
+    ui_state.redraw = true;
+
+    if (key === ui_state.typing_position) {
+        advance_typing_cursor();
+    }
+}
+
+
 function mouse_up(e) {
     if (ui_state.selected_tile === null)
         return;
@@ -504,25 +559,7 @@ function mouse_up(e) {
     if (k in ui_state.rack_tiles_on_board || k in state.board)
         return;
 
-    if (k === ui_state.typing_position) {
-        advance_typing_cursor();
-    }
-
-    if (state.rack[i].toLowerCase() == state.rack[i]) {
-        var choice = window.prompt('Which letter do you want to place?');
-        if (choice === null) {
-            return;
-        } else if (! /^[a-zA-Z]$/.test(choice)) {
-            alert('Must input a single letter!');
-            return;
-        } else {
-            state.rack[i] = choice[0].toLowerCase();
-        }
-    }
-
-    ui_state.rack_tiles_on_board[k] = i;
-    ui_state.rack_tiles_on_board_idx[i] = k;
-    ui_state.redraw = true;
+    place_tile(i, k);
 
     ui_state.score = calculate_score();
 }
@@ -544,6 +581,41 @@ function mouse_move(e) {
 }
 
 
+function tile_for_letter(l) {
+    l = l.toUpperCase();
+    for (var i = 0; i < state.rack.length; i++) {
+        if (state.rack[i] == l && !(i in ui_state.rack_tiles_on_board_idx))
+            return i;
+    }
+    for (var i = 0; i < state.rack.length; i++) {
+        if (is_blank(state.rack[i]) && !(i in ui_state.rack_tiles_on_board_idx))
+            return i;
+    }
+    return null;
+}
+
+
+function key_down(e) {
+    if (ui_state.typing_position === null)
+        return;
+
+    if (e.keyCode >= 65 && e.keyCode <= 90) { // letters
+        var letter = String.fromCharCode(e.keyCode);
+        var tile = tile_for_letter(letter);
+        if (tile !== null)
+            place_tile(tile, ui_state.typing_position, letter);
+    } else if (e.keyCode == 32) { // space
+        advance_typing_cursor();
+    } else if (e.keyCode == 8) { // backspace
+        backspace_typing_cursor();
+    } else {
+        return;
+    }
+
+    e.preventDefault();
+}
+
+
 function pass() {
     $.post(urls.play,
            { 'move': 'skip' },
@@ -558,6 +630,7 @@ function swap() {
                                'Choices: ' + state.rack.join(', '));
     if (tiles === null)
         return;
+    disable_typing_cursor();
     tiles = tiles.toUpperCase().replace(/\s+/g, '').split('');
     tiles.sort();
 
@@ -580,6 +653,7 @@ function play() {
         return;
     }
 
+    disable_typing_cursor();
     var played_tiles = {};
     $.each(ui_state.rack_tiles_on_board, function(k, rack_idx) {
         played_tiles[k] = state.rack[rack_idx];
@@ -625,6 +699,7 @@ function post_chat() {
 
 
 function recall_tiles() {
+    disable_typing_cursor();
     ui_state.score = 0;
     ui_state.rack_tiles_on_board = {};
     ui_state.rack_tiles_on_board_idx = {};
@@ -1125,6 +1200,7 @@ function init(urls_) {
     canvas[supportsTouch ? 'ontouchstart' : 'onmousedown'] = mouse_down;
     canvas[supportsTouch ? 'ontouchmove' : 'onmousemove']  = mouse_move;
     canvas[supportsTouch ? 'ontouchend' : 'onmouseup']  = mouse_up;
+    canvas['onkeydown'] = key_down;
 
     setInterval(draw, 1000 / 60);
 }
