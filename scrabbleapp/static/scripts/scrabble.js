@@ -218,7 +218,7 @@ function draw_rack() {
 
 function key_to_pixel_coords(k) {
     var cell_size = ui_immutable_state.cell_size;
-    var pos = make_pos(k)
+    var pos = make_pos(k);
     var x = ui_immutable_state.board_offset[0] + pos[0]*cell_size;
     var y = ui_immutable_state.board_offset[1] + pos[1]*cell_size;
     return [x, y];
@@ -582,12 +582,13 @@ function mouse_move(e) {
 
 
 function tile_for_letter(l) {
+    var i;
     l = l.toUpperCase();
-    for (var i = 0; i < state.rack.length; i++) {
+    for (i = 0; i < state.rack.length; i++) {
         if (state.rack[i] == l && !(i in ui_state.rack_tiles_on_board_idx))
             return i;
     }
-    for (var i = 0; i < state.rack.length; i++) {
+    for (i = 0; i < state.rack.length; i++) {
         if (is_blank(state.rack[i]) && !(i in ui_state.rack_tiles_on_board_idx))
             return i;
     }
