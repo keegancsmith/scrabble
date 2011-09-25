@@ -460,6 +460,7 @@ function backspace_typing_cursor() {
         delete ui_state.rack_tiles_on_board_idx[i];
     }
     ui_state.typing_position = key;
+    ui_state.score = calculate_score();
     ui_state.redraw = true;
 }
 
@@ -513,14 +514,16 @@ function place_tile(tile, key, blank_letter) {
                 alert('Must input a single letter!');
                 return;
             } else {
-                blank_letter = choice[0].toLowerCase();
+                blank_letter = choice[0];
             }
         }
-        state.rack[tile] = blank_letter;
+        state.rack[tile] = blank_letter.toLowerCase();
     }
 
     ui_state.rack_tiles_on_board[key] = tile;
     ui_state.rack_tiles_on_board_idx[tile] = key;
+
+    ui_state.score = calculate_score();
     ui_state.redraw = true;
 
     if (key === ui_state.typing_position) {
@@ -560,8 +563,6 @@ function mouse_up(e) {
         return;
 
     place_tile(i, k);
-
-    ui_state.score = calculate_score();
 }
 
 
