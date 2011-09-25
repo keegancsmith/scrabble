@@ -514,10 +514,10 @@ function place_tile(tile, key, blank_letter) {
                 alert('Must input a single letter!');
                 return;
             } else {
-                blank_letter = choice[0].toLowerCase();
+                blank_letter = choice[0];
             }
         }
-        state.rack[tile] = blank_letter;
+        state.rack[tile] = blank_letter.toLowerCase();
     }
 
     ui_state.rack_tiles_on_board[key] = tile;
