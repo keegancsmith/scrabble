@@ -61,11 +61,22 @@ def create_game(request):
 @login_required
 @render_to('scrabbleapp/active_games.html')
 def active_games(request):
-    active_qs = request.user.game_set.filter(active=True)
-    inactive_qs = request.user.game_set.filter(active=False)
+    return active_games_dict(request.user)
+
+@never_cache
+@login_required
+@require_GET
+@ajax_request
+def active_games_json(request):
+    return dict((k, [immutable_state(game, request.user) for game in games])
+                    for k, games in active_games_dict(request.user).iteritems())
+
+def active_games_dict(user):
+    active_qs = user.game_set.filter(active=True)
+    inactive_qs = user.game_set.filter(active=False)
     return {
-        'my_turn': active_qs.filter(current_player=request.user),
-        'other':   active_qs.exclude(current_player=request.user),
+        'my_turn': active_qs.filter(current_player=user),
+        'other': active_qs.exclude(current_player=user),
         'recent':  inactive_qs.order_by('-last_played')[:10],
     }
 
@@ -113,14 +124,18 @@ def game_state(request):
 @require_GET
 @ajax_request
 def game_immutable_state(request):
-    player_num = request.game.gameplayer_set.get(user=request.user).player_num
+    return immutable_state(request.game, request.user)
+
+def immutable_state(game, user):
+    player_num = game.gameplayer_set.get(user=user).player_num
     return {
         'players': [{
                 'username': u.username,
                 'first_name': u.first_name,
                 'last_name': u.last_name
-            } for u in request.game.get_players()],
-        'player_num': player_num
+            } for u in game.get_players()],
+        'player_num': player_num,
+        'url': game.get_absolute_url()
     }
 
 @game_required
